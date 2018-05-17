@@ -4,22 +4,6 @@ clc, close all, clear all
 
 addpath('overhead_functions/')
 
-%% eom symbolically
- 
-syms Ixx Iyy Izz wx wy wz dwx dwy dwz Tx Ty Tz
-
-I = [Ixx 0 0;0 Iyy 0;0 0 Izz];
-T = [Tx;Ty;Tz];
-dw = [dwx;dwy;dwz];
-w = [wx;wy;wz];
-
-eq1 = T == I*dw+cross(w,I*w);
-eq2 = eq1(1);
-eq3 = eq1(2);
-eq4 = eq1(3);
-
-[dwx,dwy,dwz] = solve([eq2 eq3 eq4],[dwx dwy dwz]);
-
 %% orbital parameters
 h = 53335.2;
 ecc = 0;
