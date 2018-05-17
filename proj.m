@@ -84,10 +84,6 @@ ns_b = C_b_ECI*ns;
 
 % Velocity vector in body
 v_b =  C_b_ECI*state(11:13);
-<<<<<<< HEAD
-I = diag([857.091666666667 590.425 626.666666666667]); % Spacecraft inertia matrix
-=======
->>>>>>> 30dc852214950a64bf4a65f5dae68b54a5113530
 
 % if no torque set torques to zero
 if strcmp(Torque,'no')
