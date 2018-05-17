@@ -76,13 +76,13 @@ function [y]=day_func(t,state,Torque)
 ns = [-1;0;0]; % Constant in ECI
 
 % Transformation matrix from ECI to body
-Cb_ECI = cx(state(1))*cy(state(2))*cz(state(3));
+C_b_ECI = cx(state(1))*cy(state(2))*cz(state(3));
 
 % sun vector in body
 ns_b = C_b_ECI*ns;
 
 % Velocity vector in body
-v_b =  C_b_ECI*state(11:13);;
+v_b =  C_b_ECI*state(11:13);
 I = diag([857.091666666667 590.425 626.666666666667]); % Spacecraft inertia matrix
 
 % if no torque set torques to zero
