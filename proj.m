@@ -1,22 +1,8 @@
-%% Henry Macanas
+% Henry Macanas
+% Eric Ekstrom
+% Michael Johnston
 % 421 Assignment 6
 clc, close all, clear all
-
-%% eom symbolically
- 
-syms Ixx Iyy Izz wx wy wz dwx dwy dwz Tx Ty Tz
-
-I = [Ixx 0 0;0 Iyy 0;0 0 Izz];
-T = [Tx;Ty;Tz];
-dw = [dwx;dwy;dwz];
-w = [wx;wy;wz];
-
-eq1 = T == I*dw+cross(w,I*w);
-eq2 = eq1(1);
-eq3 = eq1(2);
-eq4 = eq1(3);
-
-[dwx,dwy,dwz] = solve([eq2 eq3 eq4],[dwx dwy dwz]);
 
 %% orbital parameters
 h = 53335.2;
@@ -87,6 +73,16 @@ function [y]=day_func(t,state,Torque)
 
 % Constants
 I = diag([644.5917 377.9250 626.6667]);
+ns = [-1;0;0]; % Constant in ECI
+
+% Transformation matrix from ECI to body
+Cb_ECI = cx(state(1))*cy(state(2))*cz(state(3));
+
+% sun vector in body
+ns_b = C_b_ECI*ns;
+
+% Velocity vector in body
+v_b =  C_b_ECI*state(11:13);;
 
 % if no torque set torques to zero
 if strcmp(Torque,'no')
