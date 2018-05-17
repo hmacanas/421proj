@@ -1,4 +1,4 @@
-%% Henry Macanas is lame as fuuuuk
+%% Henry Macanas
 % 421 Assignment 6
 clc, close all, clear all
 
@@ -15,9 +15,6 @@ eq1 = T == I*dw+cross(w,I*w);
 eq2 = eq1(1);
 eq3 = eq1(2);
 eq4 = eq1(3);
-
-bullshit
-henry's bullshit
 
 [dwx,dwy,dwz] = solve([eq2 eq3 eq4],[dwx dwy dwz]);
 
