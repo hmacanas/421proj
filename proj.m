@@ -16,6 +16,8 @@ eq2 = eq1(1);
 eq3 = eq1(2);
 eq4 = eq1(3);
 
+bullshit
+
 [dwx,dwy,dwz] = solve([eq2 eq3 eq4],[dwx dwy dwz]);
 
 %% orbital parameters
