@@ -2,6 +2,8 @@
 % 421 Assignment 6
 clc, close all, clear all
 
+addpath('overhead_functions/')
+
 %% eom symbolically
  
 syms Ixx Iyy Izz wx wy wz dwx dwy dwz Tx Ty Tz
@@ -42,7 +44,7 @@ C_lvlh_eci= eci2lvlh(r0,v0);
 C_eci_lvlh = C_lvlh_eci';
 
 % initial states inn reference to eci        
-w0_body_eci = [0;-.001047;0];
+w0_body_eci = [0;-2*pi/P;0];
 
 w_body_eci = w0_body_eci;
 w_body_lvlh = C_lvlh_eci*w_body_eci - C_lvlh_eci*w_lvlh_eci;
@@ -55,10 +57,9 @@ state = [euler_angles0_eci;w0_body_eci;q0_eci_eci;r0_eci_eci;v0_eci_eci];
 
 % ode call
 Torque = 'no';
-tspan = [0 300*60];
+tspan = [0 3*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8);
 [tnew0, statenew0] = ode45(@day_func,tspan,state,options,Torque);
-
 
 %% no torque plots
 figure
@@ -107,9 +108,3 @@ acc = -muearth*state(11:13)./r^3;
 y = [eulrates;wdot;quaternion_rates;state(14:16); acc];
 
 end
-
-
-
-
-
-
