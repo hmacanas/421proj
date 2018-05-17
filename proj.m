@@ -21,7 +21,7 @@ nu = 0;
 [ ~,~,~,~,~,~,P,~ ] = coes( r0,v0 );
 
 % angular velcoity of lvlh frame
-w_lvlh_eci = cross(r0,v0)/norm(r0)^2; % this is wrong, should be a 3x1 not 1x1
+w_lvlh_eci_eci = cross(r0,v0)/norm(r0)^2; % this is wrong, should be a 3x1 not 1x1
 
 %% rigid body prop
 
@@ -33,7 +33,7 @@ C_eci_lvlh = C_lvlh_eci';
 w0_body_eci = [0;-2*pi/P;0];
 
 w_body_eci = w0_body_eci;
-w_body_lvlh0 = w_body_eci - C_lvlh_eci'*w_lvlh_eci;
+w_body_lvlh0 = w_body_eci - C_lvlh_eci'*w_lvlh_eci_eci;
 
 r0_eci_eci = r0;
 v0_eci_eci = v0;
