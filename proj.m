@@ -71,7 +71,7 @@ legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
 function [y]=day_func(t,state,Torque)
 
 % Constants
-I = diag([644.5917 377.9250 626.6667]);
+I = diag([857.091666666667 590.425 626.666666666667]); % Spacecraft inertia matrix
 
 % if no torque set torques to zero
 if strcmp(Torque,'no')
