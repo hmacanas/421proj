@@ -1,4 +1,4 @@
-%% Henry Macanas
+%% Henry Macanas is lame as fuuuuk
 % 421 Assignment 6
 clc, close all, clear all
 
