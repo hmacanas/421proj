@@ -33,12 +33,12 @@ C_eci_lvlh = C_lvlh_eci';
 w0_body_eci = [0;-2*pi/P;0];
 
 w_body_eci = w0_body_eci;
-w_body_lvlh0 = w_body_eci - C_lvlh_eci'*w_lvlh_eci_eci;
+w_body_lvlh0 = w_body_eci - C_lvlh_eci*w_lvlh_eci_eci;
 
 r0_eci_eci = r0;
 v0_eci_eci = v0;
-euler_angles0_eci = euler_angs(C_eci_lvlh);
-q0_eci_eci = quaternion(C_eci_lvlh);
+euler_angles0_eci = euler_angs(C_lvlh_eci);
+q0_eci_eci = quaternion(C_lvlh_eci);
 state = [euler_angles0_eci;w0_body_eci;q0_eci_eci;r0_eci_eci;v0_eci_eci];
 
 % ode call
