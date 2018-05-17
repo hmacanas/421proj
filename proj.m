@@ -77,7 +77,7 @@ ns = [-1;0;0]; % Constant in ECI
 I = diag([857.091666666667 590.425 626.666666666667]); % Spacecraft inertia matrix
 
 % Transformation matrix from ECI to body
-Cb_ECI = cx(state(1))*cy(state(2))*cz(state(3));
+C_b_ECI = cx(state(1))*cy(state(2))*cz(state(3));
 
 % sun vector in body
 ns_b = C_b_ECI*ns;
