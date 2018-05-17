@@ -4,6 +4,8 @@
 % 421 Assignment 6
 clc, close all, clear all
 
+addpath('overhead_functions/')
+
 %% orbital parameters
 h = 53335.2;
 ecc = 0;
@@ -19,7 +21,7 @@ nu = 0;
 [ ~,~,~,~,~,~,P,~ ] = coes( r0,v0 );
 
 % angular velcoity of lvlh frame
-w_lvlh_eci = 2*pi/P; % this is wrong, should be a 3x1 not 1x1
+w_lvlh_eci = cross(r0,v0)/norm(r0)^2; % this is wrong, should be a 3x1 not 1x1
 
 %% rigid body prop
 
@@ -28,10 +30,10 @@ C_lvlh_eci= eci2lvlh(r0,v0);
 C_eci_lvlh = C_lvlh_eci';
 
 % initial states inn reference to eci        
-w0_body_eci = [0;-.001047;0];
+w0_body_eci = [0;-2*pi/P;0];
 
 w_body_eci = w0_body_eci;
-w_body_lvlh = C_lvlh_eci*w_body_eci - C_lvlh_eci*w_lvlh_eci;
+w_body_lvlh = w_body_eci - C_lvlh_eci*w_lvlh_eci;
 
 r0_eci_eci = r0;
 v0_eci_eci = v0;
@@ -41,10 +43,9 @@ state = [euler_angles0_eci;w0_body_eci;q0_eci_eci;r0_eci_eci;v0_eci_eci];
 
 % ode call
 Torque = 'no';
-tspan = [0 300*60];
+tspan = [0 3*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8);
 [tnew0, statenew0] = ode45(@day_func,tspan,state,options,Torque);
-
 
 %% no torque plots
 figure
@@ -72,7 +73,6 @@ legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
 function [y]=day_func(t,state,Torque)
 
 % Constants
-I = diag([644.5917 377.9250 626.6667]);
 ns = [-1;0;0]; % Constant in ECI
 
 % Transformation matrix from ECI to body
@@ -83,6 +83,7 @@ ns_b = C_b_ECI*ns;
 
 % Velocity vector in body
 v_b =  C_b_ECI*state(11:13);;
+I = diag([857.091666666667 590.425 626.666666666667]); % Spacecraft inertia matrix
 
 % if no torque set torques to zero
 if strcmp(Torque,'no')
@@ -103,9 +104,3 @@ acc = -muearth*state(11:13)./r^3;
 y = [eulrates;wdot;quaternion_rates;state(14:16); acc];
 
 end
-
-
-
-
-
-
