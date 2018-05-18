@@ -150,11 +150,12 @@ else
     T_g = 3*muearth/r_mag^5*cross_matrix(rb)*I*rb;
 
     % srp torque
-	T_srp = srp(consts.n,consts.rho,ns_b,consts.A);
+	 T_srp = srp(consts.n,consts.rho,ns_b,consts.A);
     % magnetic torque
 	
 	
     % atmospheric drag torque
+	 T_srp = drag(consts.n,consts.rho,v_b,consts.A);
 	
     % total torque
     T = T_g + T_srp;
