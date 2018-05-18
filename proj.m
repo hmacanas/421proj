@@ -101,7 +101,7 @@ legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
 function [y]=day_func(t,state,Torque)
 
 % Constants
-ns = [-1;0;0]; % Constant in ECI
+ns = [1;0;0]; % Constant in ECI
 I = diag([857.091666666667 590.425 626.666666666667]); % Spacecraft inertia matrix
 
 % Transformation matrix from ECI to body
