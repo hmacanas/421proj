@@ -28,20 +28,21 @@ w_lvlh_eci_eci = cross(r0,v0)/norm(r0)^2; % this is wrong, should be a 3x1 not 1
 % lvlh to eci tranformation 
 C_lvlh_eci= eci2lvlh(r0,v0);
 C_eci_lvlh = C_lvlh_eci';
+C_body_lvlh = eye(3);
+C_body_eci = C_body_lvlh*C_lvlh_eci;
 
 % initial states inn reference to eci        
 w0_body_eci = [0;-2*pi/P;0];
 
 r0_eci_eci = r0;
 v0_eci_eci = v0;
-euler_angles0_eci = euler_angs(C_lvlh_eci);
-q0_eci_eci = quaternion(C_lvlh_eci);
+euler_angles0_eci = euler_angs(C_body_eci);
+q0_eci_eci = quaternion(C_body_eci);
 
 % states relative to lvlh
 euler_angs0_lvlh = [0;0;0];
 w_body_eci = w0_body_eci;
-w_body_lvlh0 = w_body_eci - C_lvlh_eci*w_lvlh_eci_eci;
-% w_body_lvlh0 = [0;0;0];
+w_body_lvlh0 = w_body_eci - C_body_eci*w_lvlh_eci_eci;
 q0_body_lvlh = [0;0;0;1];
 
 state = [euler_angles0_eci;w0_body_eci;q0_eci_eci;r0_eci_eci;v0_eci_eci;...
