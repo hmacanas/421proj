@@ -115,7 +115,7 @@ legend('\phi','\theta','\psi')
 
 figure
 plot(tnew0,statenew0(:,23:26),'LineWidth',2)
-title('Quaternion Components from F_b to F_eci')
+title('Quaternion Components from F_b to F_lvlh')
 xlabel('Time (s)')
 ylabel('Magnitude (None)')
 legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
