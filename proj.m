@@ -155,10 +155,10 @@ else
 	
 	
     % atmospheric drag torque
-	 T_srp = drag(consts.n,consts.rho,v_b,consts.A);
+	 T_drag = drag(consts.n,consts.rho,v_b,consts.A);
 	
     % total torque
-    T = T_g + T_srp;
+    T = T_g + T_srp + T_drag;
 end
 
 
