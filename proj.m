@@ -28,27 +28,33 @@ w_lvlh_eci_eci = cross(r0,v0)/norm(r0)^2; % this is wrong, should be a 3x1 not 1
 % lvlh to eci tranformation 
 C_lvlh_eci= eci2lvlh(r0,v0);
 C_eci_lvlh = C_lvlh_eci';
+C_body_lvlh = eye(3);
+C_body_eci = C_body_lvlh*C_lvlh_eci;
 
 % initial states inn reference to eci        
 w0_body_eci = [0;-2*pi/P;0];
 
-w_body_eci = w0_body_eci;
-w_body_lvlh0 = w_body_eci - C_lvlh_eci*w_lvlh_eci_eci;
-
 r0_eci_eci = r0;
 v0_eci_eci = v0;
-euler_angles0_eci = euler_angs(C_lvlh_eci);
-q0_eci_eci = quaternion(C_lvlh_eci);
-state = [euler_angles0_eci; w0_body_eci;q0_eci_eci;r0_eci_eci;v0_eci_eci;...
-	C_lvlh_eci*euler_angles0_eci; C_lvlh_eci*w0_body_eci];
+euler_angles0_eci = euler_angs(C_body_eci);
+q0_eci_eci = quaternion(C_body_eci);
+
+% states relative to lvlh
+euler_angs0_lvlh = [0;0;0];
+w_body_eci = w0_body_eci;
+w_body_lvlh0 = w_body_eci - C_body_eci*w_lvlh_eci_eci;
+q0_body_lvlh = [0;0;0;1];
+
+state = [euler_angles0_eci;w0_body_eci;q0_eci_eci;r0_eci_eci;v0_eci_eci;...
+    euler_angs0_lvlh;w_body_lvlh0;q0_body_lvlh];
 
 % ode call
 Torque = 'no';
 tspan = [0 3*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8);
-[tnew0, statenew0] = ode45(@day_func,tspan,state,options,Torque, C_lvlh_eci);
+[tnew0, statenew0] = ode45(@day_func,tspan,state,options,Torque);
 
-%% no torque plots
+%% no torque plots eci
 figure
 plot(tnew0,statenew0(:,4:6),'LineWidth',2)
 title('Absolute Angular Velocity of Spacecraft with no Torque: F_b relative to F_eci')
@@ -60,7 +66,7 @@ figure
 plot(tnew0,rad2deg(statenew0(:,1:3)),'LineWidth',2)
 title('Euler Angles from F_b to F_eci')
 xlabel('Time (s)')
-ylabel('Angular Velocity (rads/s)')
+ylabel('Angle (\circ)')
 legend('\phi','\theta','\psi')
 
 figure
@@ -70,58 +76,82 @@ xlabel('Time (s)')
 ylabel('Magnitude (None)')
 legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
 
+%% no torque plots body
 figure
-plot(tnew0,rad2deg(statenew0(:,17:19)),'LineWidth',2)
-title('Euler Angles from F_b to F_(LVLH)')
+plot(tnew0,statenew0(:,20:22),'LineWidth',2)
+title('Absolute Angular Velocity of Spacecraft with no Torque: F_b relative to F_lvlh')
 xlabel('Time (s)')
 ylabel('Angular Velocity (rads/s)')
+legend('\omega_x','\omega_y','\omega_z')
+
+figure
+plot(tnew0,rad2deg(statenew0(:,17:19)),'LineWidth',2)
+title('Euler Angles from F_b to F_lvlh')
+xlabel('Time (s)')
+ylabel('Angle (\circ)')
 legend('\phi','\theta','\psi')
 
+figure
+plot(tnew0,statenew0(:,23:26),'LineWidth',2)
+title('Quaternion Components from F_b to F_eci')
+xlabel('Time (s)')
+ylabel('Magnitude (None)')
+legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
+
 %% Functions
-function [y]=day_func(t,state,Torque,C_lvlh_eci)
-
-eulerAngs_eci = state(1:3);
-w_b_eci = state(4:6);
-q_eci_eci = state(7:10);
-r_eci_eci = state(11:13);
-v_eci_eci = state(14:16);
-
+function [y]=day_func(t,state,Torque)
 % Constants
-ns_eci = [-1;0;0]; % Sun vector (constant in ECI)
-I = diag([857.091666666667 590.425 626.666666666667]); % SC inertia matrix
+ns = [1;0;0]; % Constant in ECI
+I = diag([857.091666666667 590.425 626.666666666667]); % Spacecraft inertia matrix
+muearth = 398600;
+
+% nagnitude of r vector
+r_mag = norm(state(11:13));
 
 % Transformation matrix from ECI to body
-C_b_ECI = cx(eulerAngs_eci(1))*cy(eulerAngs_eci(2))*cz(eulerAngs_eci(3));
+C_b_ECI = cx(state(1))*cy(state(2))*cz(state(3));
 
-% Sun vector in body
-ns_b = C_b_ECI*ns_eci;
+% sun vector in body
+ns_b = C_b_ECI*ns;
 
 % Velocity vector in body
-v_b =  C_b_ECI*r_eci_eci;
+v_b =  C_b_ECI*state(11:13);
+
 
 % if no torque set torques to zero
 if strcmp(Torque,'no')
     T = [0;0;0];
+else
+    % gravity torque
+    rb = C_b_ECI*state(11:13);
+    Tg = 3*muearth/r_mag^5*cross_matrix(rb)*I*rb;
+
+    % srp torque
+
+    % magnetic torque
+
+    % atmospheric drag torque
+
+    % total torque
+    T = Tg;
 end
 
-% Equations for attitude motion in ECI 
-wdot = I\(T - cross(w_b_eci,I*w_b_eci));
-eulrates = euler_rates(w_b_eci,eulerAngs_eci(1),eulerAngs_eci(2));
-quaternion_rates = quatrates(w_b_eci,q_eci_eci);
 
-% Equations for attitude motion in LVLH
-eulerAngs_lvlh = C_lvlh_eci*eulerAngs_eci;
-wdot_lvlh = I\(T - cross(C_lvlh_eci*w_b_eci,I*C_lvlh_eci*w_b_eci));
-eulrates_lvlh = euler_rates(C_lvlh_eci*w_b_eci,eulerAngs_eci(1),eulerAngs_eci(2));
-% quaternion_rates_lvlh = quatrates(w_b_eci,q_eci_eci);
+    
+% attitude motion equatiuons eci
+wdot_eci = I\(T - cross(state(4:6),I*state(4:6)));
+eulrates_eci = euler_rates(state(4:6),state(1),state(2));
+quaternion_rates_eci = quatrates(state(4:6),state(7:10));
+
+%attitude motion equatiuons body
+wdot_lvlh = I\(T - cross(state(20:22),I*state(20:22)));
+eulrates_lvlh = euler_rates(state(20:22),state(17),state(18));
+quaternion_rates_lvlh = quatrates(state(20:22),state(23:26));
 
 % orbital motion equations
-muearth = 398600;
-r = norm(r_eci_eci);
-acc = -muearth*r_eci_eci./r^3;
+acc = -muearth*state(11:13)./r_mag^3;
 
-% outputs that will be intergrated
-% Euler angles, euler rates, quaternions, position, velocity
-y = [eulrates;wdot;quaternion_rates;v_eci_eci;acc;eulrates_lvlh;wdot_lvlh];
+% outputs that will be intergrated 
+y = [eulrates_eci;wdot_eci;quaternion_rates_eci;state(14:16); acc;eulrates_lvlh;wdot_lvlh;quaternion_rates_lvlh];
 
 end
