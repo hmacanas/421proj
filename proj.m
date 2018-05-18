@@ -64,9 +64,11 @@ consts.Rbsp = [0; 2.5; 0]; % Distance from bus COM to solar panel COM
 consts.Rbsens = [0; 0; 1.5]; % Distance from bus COM to sensor COM
 consts.masses = [500,20,20,100]; % Component masses
 consts.COM = getCOM(consts.masses,[consts.Rbb consts.Rbsp -consts.Rbsp consts.Rbsens]); % Spacecraft center of mass
-
+consts.n = n;
+consts.rho = rho;
+consts.A = A;
 % ode call
-Torque = 'no';
+Torque = 'yes';
 tspan = [0 3*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8);
 [tnew0, statenew0] = ode45(@day_func,tspan,state,options,Torque,consts);
@@ -142,17 +144,17 @@ if strcmp(Torque,'no')
 else
     % gravity torque
     rb = C_b_ECI*state(11:13);
-    Tg = 3*muearth/r_mag^5*cross_matrix(rb)*I*rb;
+    T_g = 3*muearth/r_mag^5*cross_matrix(rb)*I*rb;
 
     % srp torque
-	
+	T_srp = srp(consts.n,consts.rho,ns_b,consts.A);
     % magnetic torque
 	
 	
     % atmospheric drag torque
 	
     % total torque
-    T = Tg;
+    T = T_g + T_srp;
 end
 
 

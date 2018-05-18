@@ -4,7 +4,7 @@ function [T_srp] = srp(normals,rho_vectors,sun_vector,area_vector)
     % inputs:
     
     % matrix of normal vectors 3x?, matrix of row_vectotrs 3x?,
-    % sun vector 3x1, area vectors 3x/
+    % sun vector 3x1, area vectors 1X?
     
     % outputs:
     
@@ -17,8 +17,8 @@ function [T_srp] = srp(normals,rho_vectors,sun_vector,area_vector)
     for i = 1:number_of_surfaces
         
         % if not in shade then there is a torque
-        if dot(normals(:,i)) >= 0
-            T_srp(:,i) =  -p*cross(rho_vectors(:,i),sun_vector*dot(normals(:,i),sun_vector*area_vector(:,i)));  
+        if dot(normals(:,i),sun_vector) >= 0
+            T_srp(:,i) =  -p*cross(rho_vectors(:,i),sun_vector*dot(normals(:,i),sun_vector*area_vector(i)));  
         % if in shade no torque
         else
             T_srp(:,i) = zeros(3,1);
