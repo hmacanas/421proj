@@ -48,11 +48,18 @@ q0_body_lvlh = [0;0;0;1];
 state = [euler_angles0_eci;w0_body_eci;q0_eci_eci;r0_eci_eci;v0_eci_eci;...
     euler_angs0_lvlh;w_body_lvlh0;q0_body_lvlh];
 
+% Distances to individual centers of mass
+consts.Rbb = zeros(3,1); % Distance from bus COM to bus COM
+consts.Rbsp = [0; 2.5; 0]; % Distance from bus COM to solar panel COM
+consts.Rbsens = [0; 0; 1.5]; % Distance from bus COM to sensor COM
+consts.masses = [500,20,20,100]; % Component masses
+consts.COM = getCOM(consts.masses,[consts.Rbb consts.Rbsp -consts.Rbsp consts.Rbsens]); % Spacecraft center of mass
+
 % ode call
 Torque = 'no';
 tspan = [0 3*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8);
-[tnew0, statenew0] = ode45(@day_func,tspan,state,options,Torque);
+[tnew0, statenew0] = ode45(@day_func,tspan,state,options,Torque,consts);
 
 %% no torque plots eci
 figure
@@ -99,7 +106,7 @@ ylabel('Magnitude (None)')
 legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
 
 %% Functions
-function [y]=day_func(t,state,Torque)
+function [y]=day_func(t,state,Torque,consts)
 % Constants
 ns = [1;0;0]; % Constant in ECI
 I = diag([857.091666666667 590.425 626.666666666667]); % Spacecraft inertia matrix
@@ -113,6 +120,7 @@ C_b_ECI = cx(state(1))*cy(state(2))*cz(state(3));
 
 % sun vector in body
 ns_b = C_b_ECI*ns;
+COM = consts.COM; % SC center of mass
 
 % Velocity vector in body
 v_b =  C_b_ECI*state(11:13);
@@ -127,11 +135,12 @@ else
     Tg = 3*muearth/r_mag^5*cross_matrix(rb)*I*rb;
 
     % srp torque
-
+	
     % magnetic torque
-
+	
+	
     % atmospheric drag torque
-
+	
     % total torque
     T = Tg;
 end
