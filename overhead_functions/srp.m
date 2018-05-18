@@ -16,13 +16,16 @@ function [T_srp] = srp(normals,rho_vectors,sun_vector,area_vector)
     
     for i = 1:number_of_surfaces
         
+        % if not in shade then there is a torque
         if dot(normals(:,i)) >= 0
             T_srp(:,i) =  -p*cross(rho_vectors(:,i),sun_vector*dot(normals(:,i),sun_vector*area_vector(:,i)));  
+        % if in shade no torque
         else
             T_srp(:,i) = zeros(3,1);
         end
     end
     
-    T_srp = 0;
+    T_srp = sum(T_srp,2);                               % sums all torques in x,y,z
+    
 end
 
