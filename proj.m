@@ -63,7 +63,10 @@ consts.Rbb = zeros(3,1); % Distance from bus COM to bus COM
 consts.Rbsp = [0; 2.5; 0]; % Distance from bus COM to solar panel COM
 consts.Rbsens = [0; 0; 1.5]; % Distance from bus COM to sensor COM
 consts.masses = [500,20,20,100]; % Component masses
-consts.COM = getCOM(consts.masses,[consts.Rbb consts.Rbsp -consts.Rbsp consts.Rbsens]); % Spacecraft center of mass
+dims = [2 2 2 0.25; 2 3 3 0.25; 2 0.05 0.05 1]; % Component dimensions
+[consts.COM, consts.I] = getCOM(consts.masses,...
+	[consts.Rbb consts.Rbsp -consts.Rbsp consts.Rbsens],...
+	dims); % Spacecraft center of mass
 
 % ode call
 Torque = 'no';
@@ -119,7 +122,7 @@ legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
 function [y]=day_func(t,state,Torque,consts)
 % Constants
 ns = [1;0;0]; % Constant in ECI
-I = diag([857.091666666667 590.425 626.666666666667]); % Spacecraft inertia matrix
+I = consts.I; % Spacecraft inertia matrix
 muearth = 398600;
 
 % nagnitude of r vector
