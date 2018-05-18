@@ -17,6 +17,16 @@ nu = 0;
 % initial r and v vectors
 [r0,v0 ] = coes2rv(ecc,inc,RAAN,W,h,nu );
 
+% inertial parameters
+com = [0; 0; 0.234375]; % m
+n   = [1 0 -1  0 0  0    1 1 -1 -1 0 0  0  0    1 -1 0  0;
+       0 1  0 -1 0  0    0 0  0  0 0 0  0  0    0  0 1 -1;
+       0 0  0  0 1 -1    0 0  0  0 1 1 -1 -1    0  0 0  0]; % Bus    Solar Panels    Sensor
+rho = com - [2 0 -2  0 0  0    2  2 -2 -2    0    0     0     0    .125 -.125    0     0;
+             0 2  0 -2 0  0    4 -4  4 -4    4   -4     4    -4       0     0 .125 -.125;
+             0 0  0  0 2 -2    0  0  0  0 .025 .025 -.025 -.025     1.5   1.5  1.5   1.5]; % Bus    Solar Panels    Sensor
+A   = [4 4 4 4 4 4    .15 .15 .15 .15 6 6 6 6    .25 .25 .25 .25]; % Bus    Solar Panels    Sensor
+
 % retrieves period
 [ ~,~,~,~,~,~,P,~ ] = coes( r0,v0 );
 
