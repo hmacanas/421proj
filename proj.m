@@ -100,10 +100,11 @@ legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
 
 %% Functions
 function [y]=day_func(t,state,Torque)
-
 % Constants
 ns = [1;0;0]; % Constant in ECI
 I = diag([857.091666666667 590.425 626.666666666667]); % Spacecraft inertia matrix
+muearth = 398600;
+r_mag = norm(state(11:13));
 
 % Transformation matrix from ECI to body
 C_b_ECI = cx(state(1))*cy(state(2))*cz(state(3));
@@ -114,10 +115,24 @@ ns_b = C_b_ECI*ns;
 % Velocity vector in body
 v_b =  C_b_ECI*state(11:13);
 
+
 % if no torque set torques to zero
 if strcmp(Torque,'no')
     T = [0;0;0];
 end
+
+% gravity torque
+rb = C_b_ECI*state(11:13);
+Tg = 3*muearth/r_mag^5*cross_matrix(rb)*I*rb;
+
+% srp torque
+
+% magnetic torque
+
+% atmospheric drag torque
+
+% total torque
+T = Tg;
     
 % attitude motion equatiuons eci
 wdot_eci = I\(T - cross(state(4:6),I*state(4:6)));
@@ -130,9 +145,7 @@ eulrates_lvlh = euler_rates(state(20:22),state(17),state(18));
 quaternion_rates_lvlh = quatrates(state(20:22),state(23:26));
 
 % orbital motion equations
-muearth = 398600;
-r = norm(state(11:13));
-acc = -muearth*state(11:13)./r^3;
+acc = -muearth*state(11:13)./r_mag^3;
 
 % outputs that will be intergrated 
 y = [eulrates_eci;wdot_eci;quaternion_rates_eci;state(14:16); acc;eulrates_lvlh;wdot_lvlh;quaternion_rates_lvlh];
