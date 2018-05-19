@@ -140,7 +140,7 @@ ns_b = C_b_ECI*ns;
 COM = consts.COM; % SC center of mass
 
 % Velocity vector in body
-v_b =  C_b_ECI*R;
+v_b =  C_b_ECI*state(14:16);
 
 
 % if no torque set torques to zero
