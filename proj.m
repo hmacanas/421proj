@@ -124,8 +124,8 @@ legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
 
 figure
 hold on
-plot3(statenew0(:,11),statenew0(:,12),statenew0(:,13))
-plot3(statenew0(1,11),statenew0(1,12),statenew0(1,13),'*')
+plot3(statenew(:,11),statenew(:,12),statenew(:,13))
+plot3(statenew(1,11),statenew(1,12),statenew(1,13),'*')
 
 
 %% Functions
@@ -189,7 +189,7 @@ eulrates_lvlh = euler_rates(state(20:22),state(17),state(18));
 quaternion_rates_lvlh = quatrates(state(20:22),state(23:26));
 
 % orbital motion equations
-acc = -muearth*R./r_mag^3 + F;
+acc = -muearth*R./r_mag^3;
 
 % outputs that will be intergrated 
 y = [eulrates_eci;wdot_eci;quaternion_rates_eci;state(14:16); acc;eulrates_lvlh;wdot_lvlh;quaternion_rates_lvlh];
