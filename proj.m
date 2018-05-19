@@ -17,16 +17,6 @@ nu = 0;
 % initial r and v vectors
 [r0,v0 ] = coes2rv(ecc,inc,RAAN,W,h,nu );
 
-% inertial parameters
-com = [0; 0; 0.234375]; % m
-n   = [1 0 -1  0 0  0    1 1 -1 -1 0 0  0  0    1 -1 0  0;
-       0 1  0 -1 0  0    0 0  0  0 0 0  0  0    0  0 1 -1;
-       0 0  0  0 1 -1    0 0  0  0 1 1 -1 -1    0  0 0  0]; % Bus    Solar Panels    Sensor
-rho = com - [2 0 -2  0 0  0    2  2 -2 -2    0    0     0     0    .125 -.125    0     0;
-             0 2  0 -2 0  0    4 -4  4 -4    4   -4     4    -4       0     0 .125 -.125;
-             0 0  0  0 2 -2    0  0  0  0 .025 .025 -.025 -.025     1.5   1.5  1.5   1.5]; % Bus    Solar Panels    Sensor
-A   = [4 4 4 4 4 4    .15 .15 .15 .15 6 6 6 6    .25 .25 .25 .25]; % Bus    Solar Panels    Sensor
-
 % retrieves period
 [ ~,~,~,~,~,~,P,~ ] = coes( r0,v0 );
 
@@ -59,63 +49,75 @@ state = [euler_angles0_eci;w0_body_eci;q0_eci_eci;r0_eci_eci;v0_eci_eci;...
     euler_angs0_lvlh;w_body_lvlh0;q0_body_lvlh];
 
 % Distances to individual centers of mass
-consts.Rbb = zeros(3,1); % Distance from bus COM to bus COM
-consts.Rbsp = [0; 2.5; 0]; % Distance from bus COM to solar panel COM
-consts.Rbsens = [0; 0; 1.5]; % Distance from bus COM to sensor COM
-consts.masses = [500,20,20,100]; % Component masses
-consts.n = n;
-consts.rho = rho;
-consts.A = A;
+Rbb = zeros(3,1); % Distance from bus COM to bus COM
+Rbsp = [0; 2.5; 0]; % Distance from bus COM to solar panel COM
+Rbsens = [0; 0; 1.5]; % Distance from bus COM to sensor COM
+masses = [500,20,20,100]; % Component masses
 dims = [2 2 2 0.25; 2 3 3 0.25; 2 0.05 0.05 1]; % Component dimensions
-[consts.COM, consts.I] = getCOM(consts.masses,...
-	[consts.Rbb consts.Rbsp -consts.Rbsp consts.Rbsens],...
+[consts.COM, consts.I] = getCOM(masses,...
+	[Rbb Rbsp -Rbsp Rbsens],...
 	dims); % Spacecraft center of mass
-% ode call
+
+% inertial parameters
+consts.n   = [1 0 -1  0 0  0    1 1 -1 -1 0 0  0  0    1 -1 0  0;
+       0 1  0 -1 0  0    0 0  0  0 0 0  0  0    0  0 1 -1;
+       0 0  0  0 1 -1    0 0  0  0 1 1 -1 -1    0  0 0  0]; % Bus    Solar Panels    Sensor
+consts.rho = consts.COM - [2 0 -2  0 0  0    2  2 -2 -2    0    0     0     0    .125 -.125    0     0;
+             0 2  0 -2 0  0    4 -4  4 -4    4   -4     4    -4       0     0 .125 -.125;
+             0 0  0  0 2 -2    0  0  0  0 .025 .025 -.025 -.025     1.5   1.5  1.5   1.5]; % Bus    Solar Panels    Sensor
+consts.A   = [4 4 4 4 4 4    .15 .15 .15 .15 6 6 6 6    .25 .25 .25 .25]; % Bus    Solar Panels    Sensor
+
+% -- ODE call
 Torque = 'yes';
 tspan = [0 3*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8);
-[tnew0, statenew0] = ode45(@day_func,tspan,state,options,Torque,consts);
+[tnew, statenew] = ode45(@day_func,tspan,state,options,Torque,consts);
+% Save and load solutions for speed
+% save('soln','tnew','statenew')
+% load('soln')
 
-%% no torque plots eci
+%% Body rel to ECI Plots
 figure
-plot(tnew0,statenew0(:,4:6),'LineWidth',2)
-title('Absolute Angular Velocity of Spacecraft with no Torque: F_b relative to F_eci')
+subplot(2,3,1)
+set(groot,'DefaultAxesXGrid','on', 'DefaultAxesYGrid','on')
+plot(tnew,statenew(:,4:6),'LineWidth',2)
+title('Absolute Angular Velocity of Spacecraft: F_b relative to F_{ECI}')
 xlabel('Time (s)')
 ylabel('Angular Velocity (rads/s)')
 legend('\omega_x','\omega_y','\omega_z')
 
-figure
-plot(tnew0,rad2deg(statenew0(:,1:3)),'LineWidth',2)
-title('Euler Angles from F_b to F_eci')
+subplot(2,3,2)
+plot(tnew,rad2deg(statenew(:,1:3)),'LineWidth',2)
+title('Euler Angles from F_b to F_{ECI}')
 xlabel('Time (s)')
-ylabel('Angle (\circ)')
+ylabel('Angle (degrees)')
 legend('\phi','\theta','\psi')
 
-figure
-plot(tnew0,statenew0(:,7:10),'LineWidth',2)
-title('Quaternion Components from F_b to F_eci')
+subplot(2,3,3)
+plot(tnew,statenew(:,7:10),'LineWidth',2)
+title('Quaternion Components from F_b to F_{ECI}')
 xlabel('Time (s)')
 ylabel('Magnitude (None)')
 legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
 
-%% no torque plots body
-figure
-plot(tnew0,statenew0(:,20:22),'LineWidth',2)
-title('Absolute Angular Velocity of Spacecraft with no Torque: F_b relative to F_lvlh')
+%% Body rel to LVLH Plots
+subplot(2,3,4)
+plot(tnew,statenew(:,20:22),'LineWidth',2)
+title('Absolute Angular Velocity of Spacecraft: F_b relative to F_{LVLH}')
 xlabel('Time (s)')
 ylabel('Angular Velocity (rads/s)')
 legend('\omega_x','\omega_y','\omega_z')
 
-figure
-plot(tnew0,rad2deg(statenew0(:,17:19)),'LineWidth',2)
-title('Euler Angles from F_b to F_lvlh')
+subplot(2,3,5)
+plot(tnew,rad2deg(statenew(:,17:19)),'LineWidth',2)
+title('Euler Angles from F_b to F_{LVLH}')
 xlabel('Time (s)')
-ylabel('Angle (\circ)')
+ylabel('Angle (degrees)')
 legend('\phi','\theta','\psi')
 
-figure
-plot(tnew0,statenew0(:,23:26),'LineWidth',2)
-title('Quaternion Components from F_b to F_lvlh')
+subplot(2,3,6)
+plot(tnew,statenew(:,23:26),'LineWidth',2)
+title('Quaternion Components from F_b to F_{LVLH}')
 xlabel('Time (s)')
 ylabel('Magnitude (None)')
 legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
