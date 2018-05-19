@@ -159,7 +159,7 @@ else
 	latLong = eci2lla(R'.*1E3,dateTimeVec); % Lat/long for world mag [deg?]
 	magVec_eci = wrldmagm((norm(R)-6378)*1E3, latLong(1), latLong(2), decyear(dateTimeVec))*1E-9; % Magnetic field vector [T]
 	resMag_b = [0;0;-0.5]; % Spacecraft residual magnetic torque [A*m^2]
-	T_mag = cross(C_b_ECI*magVec_eci,resMag_b) % Magnetic torque calc
+	T_mag = cross(C_b_ECI*magVec_eci,resMag_b); % Magnetic torque calc
 	
     % atmospheric drag torque
 	 T_drag = drag(consts.n,consts.rho,v_b,consts.A);
