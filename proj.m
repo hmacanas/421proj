@@ -120,6 +120,12 @@ xlabel('Time (s)')
 ylabel('Magnitude (None)')
 legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
 
+figure
+hold on
+plot3(statenew0(:,11),statenew0(:,12),statenew0(:,13))
+plot3(statenew0(1,11),statenew0(1,12),statenew0(1,13),'*')
+
+
 %% Functions
 function [y]=day_func(t,state,Torque,consts)
 % Constants
@@ -146,13 +152,14 @@ v_b =  C_b_ECI*state(14:16);
 % if no torque set torques to zero
 if strcmp(Torque,'no')
     T = [0;0;0];
+    F = [0;0;0];
 else
     % gravity torque
     rb = C_b_ECI*R;
     T_g = 3*muearth/r_mag^5*cross_matrix(rb)*I*rb;
 
-    % srp torque
-	 T_srp = srp(consts.n,consts.rho,ns_b,consts.A);
+    % srp torque and force
+	[F_srp,T_srp] = srp(consts.n,consts.rho,ns_b,consts.A);
 	 
     % -- Magnetic torque calculation --
 	dateTimeVec = datevec(datetime([2018 3 20 12 09 01])+seconds(t(end))); % Date & time
@@ -160,12 +167,13 @@ else
 	magVec_eci = wrldmagm((norm(R)-6378)*1E3, latLong(1), latLong(2), decyear(dateTimeVec))*1E-9; % Magnetic field vector [T]
 	resMag_b = [0;0;-0.5]; % Spacecraft residual magnetic torque [A*m^2]
 	T_mag = cross(C_b_ECI*magVec_eci,resMag_b); % Magnetic torque calc
-	
+
     % atmospheric drag torque
-	 T_drag = drag(consts.n,consts.rho,v_b,consts.A);
+	[F_drag,T_drag] = drag(consts.n,consts.rho,v_b,consts.A);
 	
-    % total torque
+    % total torque and force
     T = T_g + T_srp + T_drag + T_mag;
+    F = F_srp + F_drag;
 end
     
 % attitude motion equatiuons eci
@@ -179,7 +187,7 @@ eulrates_lvlh = euler_rates(state(20:22),state(17),state(18));
 quaternion_rates_lvlh = quatrates(state(20:22),state(23:26));
 
 % orbital motion equations
-acc = -muearth*R./r_mag^3;
+acc = -muearth*R./r_mag^3 + F;
 
 % outputs that will be intergrated 
 y = [eulrates_eci;wdot_eci;quaternion_rates_eci;state(14:16); acc;eulrates_lvlh;wdot_lvlh;quaternion_rates_lvlh];
