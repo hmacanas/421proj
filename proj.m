@@ -70,7 +70,7 @@ consts.A   = [4 4 4 4 4 4    .15 .15 .15 .15 6 6 6 6    .25 .25 .25 .25]; % Bus 
 % -- ODE call
 Torque = 'yes';
 tspan = [0 3*P];
-options = odeset('RelTol',1e-8,'AbsTol',1e-8);
+options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
 [tnew, statenew] = ode45(@day_func,tspan,state,options,Torque,consts);
 % Save and load solutions for speed
 % save('soln','tnew','statenew')
@@ -127,71 +127,38 @@ hold on
 plot3(statenew(:,11),statenew(:,12),statenew(:,13))
 plot3(statenew(1,11),statenew(1,12),statenew(1,13),'*')
 
+figure
+plot(Torques.tot(:,1),Torques.tot(:,2:4), 'lineWidth', 2)
+grid on
+title('Disturbance Torques')
+xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
+legend('Tx', 'Ty', 'Tz')
 
-%% Functions
-function [y]=day_func(t,state,Torque,consts)
-% Constants
-ns = [1;0;0]; % Constant in ECI
-I = consts.I; % Spacecraft inertia matrix
-muearth = 398600;
+figure
+subplot(2,2,1)
+plot(Torques.grav(:,1),Torques.grav(:,2:4), 'lineWidth', 2)
+grid on
+title('Gravity Torques')
+xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
+legend('Tx', 'Ty', 'Tz')
 
-R = state(11:13);
+subplot(2,2,2)
+plot(Torques.srp(:,1),Torques.srp(:,2:4), 'lineWidth', 2)
+grid on
+title('Solar Radiation Pressure Torques')
+xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
+legend('Tx', 'Ty', 'Tz')
 
-% nagnitude of r vector
-r_mag = norm(R);
+subplot(2,2,3)
+plot(Torques.drag(:,1),Torques.drag(:,2:4), 'lineWidth', 2)
+grid on
+title('Drag Torques')
+xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
+legend('Tx', 'Ty', 'Tz')
 
-% Transformation matrix from ECI to body
-C_b_ECI = cx(state(1))*cy(state(2))*cz(state(3));
-
-% sun vector in body
-ns_b = C_b_ECI*ns;
-COM = consts.COM; % SC center of mass
-
-% Velocity vector in body
-v_b =  C_b_ECI*state(14:16);
-
-
-% if no torque set torques to zero
-if strcmp(Torque,'no')
-    T = [0;0;0];
-    F = [0;0;0];
-else
-    % gravity torque
-    rb = C_b_ECI*R;
-    T_g = 3*muearth/r_mag^5*cross_matrix(rb)*I*rb;
-
-    % srp torque and force
-	[F_srp,T_srp] = srp(consts.n,consts.rho,ns_b,consts.A);
-	 
-    % -- Magnetic torque calculation --
-	dateTimeVec = datevec(datetime([2018 3 20 12 09 01])+seconds(t(end))); % Date & time
-	latLong = eci2lla(R'.*1E3,dateTimeVec); % Lat/long for world mag [deg?]
-	magVec_eci = wrldmagm((norm(R)-6378)*1E3, latLong(1), latLong(2), decyear(dateTimeVec))*1E-9; % Magnetic field vector [T]
-	resMag_b = [0;0;-0.5]; % Spacecraft residual magnetic torque [A*m^2]
-	T_mag = cross(C_b_ECI*magVec_eci,resMag_b); % Magnetic torque calc
-
-    % atmospheric drag torque
-	[F_drag,T_drag] = drag(consts.n,consts.rho,v_b,consts.A);
-	
-    % total torque and force
-    T = T_g + T_srp + T_drag + T_mag;
-    F = F_srp + F_drag;
-end
-    
-% attitude motion equatiuons eci
-wdot_eci = I\(T - cross(state(4:6),I*state(4:6)));
-eulrates_eci = euler_rates(state(4:6),state(1),state(2));
-quaternion_rates_eci = quatrates(state(4:6),state(7:10));
-
-%attitude motion equatiuons body
-wdot_lvlh = I\(T - cross(state(20:22),I*state(20:22)));
-eulrates_lvlh = euler_rates(state(20:22),state(17),state(18));
-quaternion_rates_lvlh = quatrates(state(20:22),state(23:26));
-
-% orbital motion equations
-acc = -muearth*R./r_mag^3;
-
-% outputs that will be intergrated 
-y = [eulrates_eci;wdot_eci;quaternion_rates_eci;state(14:16); acc;eulrates_lvlh;wdot_lvlh;quaternion_rates_lvlh];
-
-end
+subplot(2,2,4)
+plot(Torques.mag(:,1),Torques.mag(:,2:4), 'lineWidth', 2)
+grid on
+title('Magnetic Field Torques')
+xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
+legend('Tx', 'Ty', 'Tz')
