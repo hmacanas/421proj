@@ -70,7 +70,7 @@ consts.A   = [4 4 4 4 4 4    .15 .15 .15 .15 6 6 6 6    .25 .25 .25 .25]; % Bus 
 % -- ODE call
 Torque = 'yes';
 tspan = [0 3*P];
-options = odeset('RelTol',1e-8,'AbsTol',1e-8);
+options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
 [tnew, statenew] = ode45(@day_func,tspan,state,options,Torque,consts);
 % Save and load solutions for speed
 % save('soln','tnew','statenew')
@@ -127,7 +127,14 @@ hold on
 plot3(statenew(:,11),statenew(:,12),statenew(:,13))
 plot3(statenew(1,11),statenew(1,12),statenew(1,13),'*')
 
+figure
+plot(Torques.tot(:,1),Torques.tot(:,2:4), 'lineWidth', 2)
+grid on
+title('Disturbance Torques')
+xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
+legend('Tx', 'Ty', 'Tz')
 
+<<<<<<< HEAD
 %% Functions
 function [y]=day_func(t,state,Torque,consts)
 % Constants
@@ -195,3 +202,33 @@ acc = -muearth*R./r_mag^3;
 y = [eulrates_eci;wdot_eci;quaternion_rates_eci;state(14:16); acc;eulrates_lvlh;wdot_lvlh;quaternion_rates_lvlh];
 
 end
+=======
+figure
+subplot(2,2,1)
+plot(Torques.grav(:,1),Torques.grav(:,2:4), 'lineWidth', 2)
+grid on
+title('Gravity Torques')
+xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
+legend('Tx', 'Ty', 'Tz')
+
+subplot(2,2,2)
+plot(Torques.srp(:,1),Torques.srp(:,2:4), 'lineWidth', 2)
+grid on
+title('Solar Radiation Pressure Torques')
+xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
+legend('Tx', 'Ty', 'Tz')
+
+subplot(2,2,3)
+plot(Torques.drag(:,1),Torques.drag(:,2:4), 'lineWidth', 2)
+grid on
+title('Drag Torques')
+xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
+legend('Tx', 'Ty', 'Tz')
+
+subplot(2,2,4)
+plot(Torques.mag(:,1),Torques.mag(:,2:4), 'lineWidth', 2)
+grid on
+title('Magnetic Field Torques')
+xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
+legend('Tx', 'Ty', 'Tz')
+>>>>>>> 65eabf818b13a7af2760d8707e0a7755e3a2b99d
