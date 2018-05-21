@@ -159,10 +159,10 @@ else
     % gravity torque
     rb = C_b_ECI*R;
     T_g = 3*muearth/r_mag^5*cross_matrix(rb)*I*rb;
-
+    
     % srp torque and force
 	[F_srp,T_srp] = srp(consts.n,consts.rho,ns_b,consts.A);
-	 
+	
     % -- Magnetic torque calculation --
 	dateTimeVec = datevec(datetime([2018 3 20 12 09 01])+seconds(t(end))); % Date & time
 	latLong = eci2lla(R'.*1E3,dateTimeVec); % Lat/long for world mag [deg?]
