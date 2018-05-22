@@ -29,7 +29,7 @@ function [y, Torques] = day_func(t,state,Torque,consts)
 	COM = consts.COM; % SC center of mass
 
 	% Velocity vector in body
-	v_b =  C_b_ECI*state(14:16);
+	v_b =  C_b_ECI*state(14:16)*1000;
 
 
 	% if no torque set torques to zero
