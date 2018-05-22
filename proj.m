@@ -33,7 +33,6 @@ C_body_eci = C_body_lvlh*C_lvlh_eci;
 
 % initial states inn reference to eci        
 w0_body_eci = [0;-2*pi/P;0];
-
 r0_eci_eci = r0;
 v0_eci_eci = v0;
 euler_angles0_eci = euler_angs(C_body_eci);
@@ -99,7 +98,6 @@ title('Quaternion Components from F_b to F_{ECI}')
 xlabel('Time (s)')
 ylabel('Magnitude (None)')
 legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
-
 %% Body rel to LVLH Plots
 subplot(2,3,4)
 plot(tnew,statenew(:,20:22),'LineWidth',2)
