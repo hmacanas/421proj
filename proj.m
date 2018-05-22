@@ -68,7 +68,7 @@ consts.A   = [4 4 4 4 4 4    .15 .15 .15 .15 6 6 6 6    .25 .25 .25 .25]; % Bus 
 
 % -- ODE call
 Torque = 'yes';
-tspan = [0 3*P];
+tspan = [0 5*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
 [tnew, statenew] = ode45(@day_func,tspan,state,options,Torque,consts);
 % Save and load solutions for speed
