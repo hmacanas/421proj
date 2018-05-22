@@ -11,7 +11,7 @@ function [F_srp,T_srp] = srp(normals,rho_vectors,sun_vector,area_vector)
     % 3x1 torque vector
     
     number_of_surfaces = length(area_vector);           % number of surface         
-    p = 4.5*10^(-6);                                      % N/m^2 (pressure from photons)
+    p = 4.5*10^(-6);                                     % N/m^2 (pressure from photons)
     T_srp = zeros(3,number_of_surfaces);                % initialize torque
     F_srp = zeros(3,number_of_surfaces);                % initialize force
     

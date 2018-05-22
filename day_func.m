@@ -56,7 +56,7 @@ function [y, Torques] = day_func(t,state,Torque,consts)
 
 		% total torque and force
 		T = T_g + T_srp + T_drag + T_mag;
-		F = F_srp + F_drag;
+		F = (F_srp + F_drag)/1000;
 	end
 
 	% attitude motion equatiuons eci
@@ -70,7 +70,7 @@ function [y, Torques] = day_func(t,state,Torque,consts)
 	quaternion_rates_lvlh = quatrates(state(20:22),state(23:26));
 
 	% orbital motion equations
-	acc = -muearth*R./r_mag^3;
+	acc = -muearth*R./r_mag^3 + F;
 
 	% outputs that will be intergrated 
 	y = [eulrates_eci;wdot_eci;quaternion_rates_eci;state(14:16); acc;eulrates_lvlh;wdot_lvlh;quaternion_rates_lvlh];
