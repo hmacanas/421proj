@@ -31,7 +31,7 @@ C_eci_lvlh = C_lvlh_eci';
 C_body_lvlh = eye(3);
 C_body_eci = C_body_lvlh*C_lvlh_eci;
 
-% initial states inn reference to eci        
+% initial states in reference to eci        
 w0_body_eci = [0;-2*pi/P;0];
 
 r0_eci_eci = r0;
@@ -58,10 +58,11 @@ dims = [2 2 2 0.25; 2 3 3 0.25; 2 0.05 0.05 1]; % Component dimensions
 	[Rbb Rbsp -Rbsp Rbsens],...
 	dims); % Spacecraft center of mass
 
-% inertial parameters
+% Normal vectors
 consts.n   = [1 0 -1  0 0  0    1 1 -1 -1 0 0  0  0    1 -1 0  0;
        0 1  0 -1 0  0    0 0  0  0 0 0  0  0    0  0 1 -1;
        0 0  0  0 1 -1    0 0  0  0 1 1 -1 -1    0  0 0  0]; % Bus    Solar Panels    Sensor
+% Rho vectors
 consts.rho = consts.COM - [2 0 -2  0 0  0    2  2 -2 -2    0    0     0     0    .125 -.125    0     0;
              0 2  0 -2 0  0    4 -4  4 -4    4   -4     4    -4       0     0 .125 -.125;
              0 0  0  0 2 -2    0  0  0  0 .025 .025 -.025 -.025     1.5   1.5  1.5   1.5]; % Bus    Solar Panels    Sensor
