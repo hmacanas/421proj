@@ -1,4 +1,4 @@
-function [F_drag,T_drag] = drag(normals,rho_vectors,vel_vector,area_vector)
+function [F_drag,T_drag] = drag(normals,rho_vectors,vel_vector,area_vector, rho)
     % note: all vectors are in body coordinates
 
     % inputs:
@@ -12,7 +12,7 @@ function [F_drag,T_drag] = drag(normals,rho_vectors,vel_vector,area_vector)
     
     number_of_surfaces = length(area_vector);            % number of surface         
     Cd = 2.1;                                            % coefficient of drag
-    rho = 1.9e-14;                                       % density of air @ 760 km [kg/m^3]
+%     rho = 1.9e-14;                                       % density of air @ 760 km [kg/m^3]
     T_drag = zeros(3,number_of_surfaces);                % initialize torque
     F_drag = zeros(3,number_of_surfaces);                % initialize force
     
