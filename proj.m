@@ -33,7 +33,6 @@ C_body_eci = C_body_lvlh*C_lvlh_eci;
 
 % initial states inn reference to eci        
 w0_body_eci = [0;-2*pi/P;0];
-
 r0_eci_eci = r0;
 v0_eci_eci = v0;
 euler_angles0_eci = euler_angs(C_body_eci);
@@ -69,12 +68,23 @@ consts.A   = [4 4 4 4 4 4    .15 .15 .15 .15 6 6 6 6    .25 .25 .25 .25]; % Bus 
 
 % -- ODE call
 Torque = 'yes';
-tspan = [0 3*P];
+tspan = [0 5*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
 [tnew, statenew] = ode45(@day_func,tspan,state,options,Torque,consts);
 % Save and load solutions for speed
-% save('soln','tnew','statenew')
+save('soln','tnew','statenew', 'Torques')
 % load('soln')
+
+h = zeros(length(statenew),3);
+for i = 1:length(statenew)
+	h(i,:) = cross(diag(consts.I,0), statenew(i,4:6));
+end
+
+figure
+plot(tnew,h(:,:), 'lineWidth', 2)
+grid on
+title('Angular Momentum')
+xlabel('Time (seconds)'), ylabel('Angular Momentum (kg-m2/sec)')
 
 %% Body rel to ECI Plots
 figure
@@ -99,7 +109,6 @@ title('Quaternion Components from F_b to F_{ECI}')
 xlabel('Time (s)')
 ylabel('Magnitude (None)')
 legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
-
 %% Body rel to LVLH Plots
 subplot(2,3,4)
 plot(tnew,statenew(:,20:22),'LineWidth',2)
