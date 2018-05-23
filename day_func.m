@@ -52,7 +52,9 @@ function [y, Torques] = day_func(t,state,Torque,consts)
 		T_mag = cross(C_b_ECI*magVec_eci,resMag_b); % Magnetic torque calc
 
 		% atmospheric drag torque
-		[F_drag,T_drag] = drag(consts.n,consts.rho,v_b,consts.A);
+        warning('off', 'aero:atmosnrlmsise00:setf107af107aph');
+        [~,rho] = atmosnrlmsise00((norm(R)-6378)*1E3, latLong(1), latLong(2), 2018, 79, 12*60*60 + 9*60 + 1);
+		[F_drag,T_drag] = drag(consts.n,consts.rho,v_b,consts.A, rho(6));
 
 		% total torque and force
 		T = T_g + T_srp + T_drag + T_mag;
