@@ -79,10 +79,10 @@ consts.A   = [4 4 4 4 4 4    .15 .15 .15 .15 6 6 6 6    .25 .25 .25 .25]; % Bus 
 Torque = 'yes';
 tspan = [0 5*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
-% [tnew, statenew] = ode45(@day_func,tspan,state,options,Torque,consts);
+[tnew, statenew] = ode45(@day_func,tspan,state,options,Torque,consts);
 % Save and load solutions for speed
 % save('soln','tnew','statenew', 'Torques')
-load('soln')
+% load('soln')
 
 h = zeros(length(statenew),3);
 mag_h = zeros(length(statenew),1);
@@ -107,9 +107,9 @@ grid on
 title('Total Angular Momentum')
 xlabel('Time (seconds)'), ylabel('Angular Momentum (kg-m2/sec)')
 
-title('Angular Momentum Accumulated')
+title('Total Angular Momentum Accumulated')
 xlabel('Time (seconds)'), ylabel('Angular Momentum (kg-m^2/sec)')
-legend('h_x','h_y','h_z')
+
 
 
 %% Body rel to ECI Plots
@@ -137,6 +137,7 @@ ylabel('Angular Velocity (rads/s)')
 legend('\omega_x','\omega_y','\omega_z')
 
 %% Body rel to LVLH Plots
+figure
 subplot(2,1,1)
 plot(tnew,rad2deg(statenew(:,17:19)),'LineWidth',2)
 title('Euler Angles from F_b to F_{LVLH}')
