@@ -79,10 +79,10 @@ consts.A   = [4 4 4 4 4 4    .15 .15 .15 .15 6 6 6 6    .25 .25 .25 .25]; % Bus 
 Torque = 'yes';
 tspan = [0 5*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
-[tnew, statenew] = ode45(@day_func,tspan,state,options,Torque,consts);
+% [tnew, statenew] = ode45(@day_func,tspan,state,options,Torque,consts);
 % Save and load solutions for speed
-save('soln','tnew','statenew', 'Torques')
-% load('soln')
+% save('soln','tnew','statenew', 'Torques')
+load('soln')
 
 h = zeros(length(statenew),3);
 mag_h = zeros(length(statenew),1);
@@ -91,10 +91,12 @@ for i = 1:length(statenew)
     mag_h(i,:) = norm(h(i,:));
 end
 
+%% Total angular momentum accumulated
 figure
 subplot(2,1,1)
 plot(tnew,h(:,:), 'lineWidth', 2)
 grid on
+
 title('Angular Momentum')
 xlabel('Time (seconds)'), ylabel('Angular Momentum (kg-m2/sec)')
 legend('h_x','h_y','h_z')
@@ -105,10 +107,28 @@ grid on
 title('Total Angular Momentum')
 xlabel('Time (seconds)'), ylabel('Angular Momentum (kg-m2/sec)')
 
+title('Angular Momentum Accumulated')
+xlabel('Time (seconds)'), ylabel('Angular Momentum (kg-m^2/sec)')
+legend('h_x','h_y','h_z')
+
 
 %% Body rel to ECI Plots
 figure
-subplot(2,3,1)
+subplot(2,1,1)
+plot(tnew,rad2deg(statenew(:,1:3)),'LineWidth',2)
+title('Euler Angles from F_b to F_{ECI}')
+xlabel('Time (s)')
+ylabel('Angle (degrees)')
+legend('\phi','\theta','\psi')
+
+subplot(2,1,2)
+plot(tnew,statenew(:,7:10),'LineWidth',2)
+title('Quaternion Components from F_b to F_{ECI}')
+xlabel('Time (s)')
+ylabel('Magnitude (None)')
+legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
+
+figure
 set(groot,'DefaultAxesXGrid','on', 'DefaultAxesYGrid','on')
 plot(tnew,statenew(:,4:6),'LineWidth',2)
 title('Absolute Angular Velocity of Spacecraft: F_b relative to F_{ECI}')
@@ -116,40 +136,29 @@ xlabel('Time (s)')
 ylabel('Angular Velocity (rads/s)')
 legend('\omega_x','\omega_y','\omega_z')
 
-subplot(2,3,2)
-plot(tnew,rad2deg(statenew(:,1:3)),'LineWidth',2)
-title('Euler Angles from F_b to F_{ECI}')
-xlabel('Time (s)')
-ylabel('Angle (degrees)')
-legend('\phi','\theta','\psi')
-
-subplot(2,3,3)
-plot(tnew,statenew(:,7:10),'LineWidth',2)
-title('Quaternion Components from F_b to F_{ECI}')
-xlabel('Time (s)')
-ylabel('Magnitude (None)')
-legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
 %% Body rel to LVLH Plots
-subplot(2,3,4)
-plot(tnew,statenew(:,20:22),'LineWidth',2)
-title('Absolute Angular Velocity of Spacecraft: F_b relative to F_{LVLH}')
-xlabel('Time (s)')
-ylabel('Angular Velocity (rads/s)')
-legend('\omega_x','\omega_y','\omega_z')
-
-subplot(2,3,5)
+subplot(2,1,1)
 plot(tnew,rad2deg(statenew(:,17:19)),'LineWidth',2)
 title('Euler Angles from F_b to F_{LVLH}')
 xlabel('Time (s)')
 ylabel('Angle (degrees)')
 legend('\phi','\theta','\psi')
 
-subplot(2,3,6)
+subplot(2,1,2)
 plot(tnew,statenew(:,23:26),'LineWidth',2)
 title('Quaternion Components from F_b to F_{LVLH}')
 xlabel('Time (s)')
 ylabel('Magnitude (None)')
 legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
+
+figure
+plot(tnew,statenew(:,20:22),'LineWidth',2)
+title('Absolute Angular Velocity of Spacecraft: F_b relative to F_{LVLH}')
+xlabel('Time (s)')
+ylabel('Angular Velocity (rads/s)')
+legend('\omega_x','\omega_y','\omega_z')
+
+%% -- Extra Plots --
 
 %% Orbit plot
 % figure
@@ -194,4 +203,3 @@ grid on
 title('Magnetic Field Torques')
 xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
 legend('Tx', 'Ty', 'Tz')
-
