@@ -56,7 +56,7 @@ function [y, Torques] = day_func(t,state,Torque,consts)
 
 		% total torque and force
 		T = T_g + T_srp + T_drag + T_mag;
-		F = (F_srp + F_drag)/1000;
+		F = C_b_ECI'*(((F_srp + F_drag)/1000)/640);
 	end
 
 	% attitude motion equatiuons eci
