@@ -65,8 +65,17 @@ consts.rho = [1 0 -1  0 0  0      1    1   -1   -1    0    0     0     0    .125
               0 1  0 -1 0  0    2.5 -2.5  2.5 -2.5  2.5 -2.5   2.5  -2.5       0     0 .125 -.125;
               0 0  0  0 1 -1      0    0    0    0 .025 .025 -.025 -.025     1.5   1.5  1.5   1.5] - consts.COM; % Bus    Solar Panels    Sensor
 consts.A   = [4 4 4 4 4 4    .15 .15 .15 .15 6 6 6 6    .25 .25 .25 .25]; % Bus    Solar Panels    Sensor
+%% Activity 1 & 2 outputs
+ fprintf('The inertial tensor is:  \n')
+ fprintf('\n')
+ disp(consts.I)
+ fprintf('kg-m2 \n\n')
+ fprintf('The mass of the spacecraft is %d kg.\n\n',640)
+ 
+ 
+%% -- ODE call
+ 
 
-% -- ODE call
 Torque = 'yes';
 tspan = [0 5*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
@@ -76,15 +85,26 @@ save('soln','tnew','statenew', 'Torques')
 % load('soln')
 
 h = zeros(length(statenew),3);
+mag_h = zeros(length(statenew),1);
 for i = 1:length(statenew)
 	h(i,:) = cross(diag(consts.I,0), statenew(i,4:6));
+    mag_h(i,:) = norm(h(i,:));
 end
 
 figure
+subplot(2,1,1)
 plot(tnew,h(:,:), 'lineWidth', 2)
 grid on
 title('Angular Momentum')
 xlabel('Time (seconds)'), ylabel('Angular Momentum (kg-m2/sec)')
+legend('h_x','h_y','h_z')
+
+subplot(2,1,2)
+plot(tnew,mag_h(:,:), 'lineWidth', 2)
+grid on
+title('Total Angular Momentum')
+xlabel('Time (seconds)'), ylabel('Angular Momentum (kg-m2/sec)')
+
 
 %% Body rel to ECI Plots
 figure
@@ -132,10 +152,10 @@ ylabel('Magnitude (None)')
 legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
 
 %% Orbit plot
-figure
-hold on
-plot3(statenew(:,11),statenew(:,12),statenew(:,13))
-plot3(statenew(1,11),statenew(1,12),statenew(1,13),'*')
+% figure
+% hold on
+% plot3(statenew(:,11),statenew(:,12),statenew(:,13))
+% plot3(statenew(1,11),statenew(1,12),statenew(1,13),'*')
 
 %% Total Torque
 figure
