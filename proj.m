@@ -104,13 +104,13 @@ xlabel('Time (s)')
 ylabel('Magnitude (None)')
 legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
 
-% figure
-% set(groot,'DefaultAxesXGrid','on', 'DefaultAxesYGrid','on')
-% plot(tnew,statenew(:,4:6),'LineWidth',2)
-% title('Absolute Angular Velocity of Spacecraft: F_b relative to F_{ECI}')
-% xlabel('Time (s)')
-% ylabel('Angular Velocity (rads/s)')
-% legend('\omega_x','\omega_y','\omega_z')
+figure
+set(groot,'DefaultAxesXGrid','on', 'DefaultAxesYGrid','on')
+plot(tnew,statenew(:,4:6),'LineWidth',2)
+title('Absolute Angular Velocity of Spacecraft: F_b relative to F_{ECI}')
+xlabel('Time (s)')
+ylabel('Angular Velocity (rads/s)')
+legend('\omega_x','\omega_y','\omega_z')
 
 %% Body rel to LVLH Plots
 subplot(2,1,1)
@@ -127,55 +127,55 @@ xlabel('Time (s)')
 ylabel('Magnitude (None)')
 legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
 
-% figure
-% plot(tnew,statenew(:,20:22),'LineWidth',2)
-% title('Absolute Angular Velocity of Spacecraft: F_b relative to F_{LVLH}')
-% xlabel('Time (s)')
-% ylabel('Angular Velocity (rads/s)')
-% legend('\omega_x','\omega_y','\omega_z')
+figure
+plot(tnew,statenew(:,20:22),'LineWidth',2)
+title('Absolute Angular Velocity of Spacecraft: F_b relative to F_{LVLH}')
+xlabel('Time (s)')
+ylabel('Angular Velocity (rads/s)')
+legend('\omega_x','\omega_y','\omega_z')
 
 %% -- Extra Plots --
 
 %% Orbit plot
-% figure
-% hold on
-% plot3(statenew(:,11),statenew(:,12),statenew(:,13))
-% plot3(statenew(1,11),statenew(1,12),statenew(1,13),'*')
+figure
+hold on
+plot3(statenew(:,11),statenew(:,12),statenew(:,13))
+plot3(statenew(1,11),statenew(1,12),statenew(1,13),'*')
 
 %% Total Torque
-% figure
-% plot(Torques.tot(:,1),Torques.tot(:,2:4), 'lineWidth', 2)
-% grid on
-% title('Disturbance Torques')
-% xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
-% legend('Tx', 'Ty', 'Tz')
+figure
+plot(Torques.tot(:,1),Torques.tot(:,2:4), 'lineWidth', 2)
+grid on
+title('Disturbance Torques')
+xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
+legend('Tx', 'Ty', 'Tz')
 
 %% Individual Torques
-% figure
-% subplot(2,2,1)
-% plot(Torques.grav(:,1),Torques.grav(:,2:4), 'lineWidth', 2)
-% grid on
-% title('Gravity Torques')
-% xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
-% legend('Tx', 'Ty', 'Tz')
-% 
-% subplot(2,2,2)
-% plot(Torques.srp(:,1),Torques.srp(:,2:4), 'lineWidth', 2)
-% grid on
-% title('Solar Radiation Pressure Torques')
-% xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
-% legend('Tx', 'Ty', 'Tz')
-% 
-% subplot(2,2,3)
-% plot(Torques.drag(:,1),Torques.drag(:,2:4), 'lineWidth', 2)
-% grid on
-% title('Drag Torques')
-% xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
-% legend('Tx', 'Ty', 'Tz')
-% 
-% subplot(2,2,4)
-% plot(Torques.mag(:,1),Torques.mag(:,2:4), 'lineWidth', 2)
-% grid on
-% title('Magnetic Field Torques')
-% xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
-% legend('Tx', 'Ty', 'Tz')
+figure
+subplot(2,2,1)
+plot(Torques.grav(:,1),Torques.grav(:,2:4), 'lineWidth', 2)
+grid on
+title('Gravity Torques')
+xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
+legend('Tx', 'Ty', 'Tz')
+
+subplot(2,2,2)
+plot(Torques.srp(:,1),Torques.srp(:,2:4), 'lineWidth', 2)
+grid on
+title('Solar Radiation Pressure Torques')
+xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
+legend('Tx', 'Ty', 'Tz')
+
+subplot(2,2,3)
+plot(Torques.drag(:,1),Torques.drag(:,2:4), 'lineWidth', 2)
+grid on
+title('Drag Torques')
+xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
+legend('Tx', 'Ty', 'Tz')
+
+subplot(2,2,4)
+plot(Torques.mag(:,1),Torques.mag(:,2:4), 'lineWidth', 2)
+grid on
+title('Magnetic Field Torques')
+xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
+legend('Tx', 'Ty', 'Tz')
