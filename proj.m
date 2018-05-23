@@ -65,16 +65,15 @@ consts.rho = [1 0 -1  0 0  0      1    1   -1   -1    0    0     0     0    .125
               0 1  0 -1 0  0    2.5 -2.5  2.5 -2.5  2.5 -2.5   2.5  -2.5       0     0 .125 -.125;
               0 0  0  0 1 -1      0    0    0    0 .025 .025 -.025 -.025     1.5   1.5  1.5   1.5] - consts.COM; % Bus    Solar Panels    Sensor
 consts.A   = [4 4 4 4 4 4    .15 .15 .15 .15 6 6 6 6    .25 .25 .25 .25]; % Bus    Solar Panels    Sensor
-%% Activity 1 & 2 outputs
+
+% Activity 1 & 2 outputs
  fprintf('The inertial tensor is:  \n')
  fprintf('\n')
  disp(consts.I)
  fprintf('kg-m2 \n\n')
  fprintf('The mass of the spacecraft is %d kg.\n\n',640)
  
- 
-%% -- ODE call
- 
+%--ode call 
 
 Torque = 'yes';
 tspan = [0 5*P];
@@ -91,7 +90,7 @@ for i = 1:length(statenew)
     mag_h(i,:) = norm(h(i,:));
 end
 
-%% Total angular momentum accumulated
+%% Angular Momentum Accumulated
 figure
 subplot(2,1,1)
 plot(tnew,h(:,:), 'lineWidth', 2)
@@ -112,9 +111,9 @@ xlabel('Time (seconds)'), ylabel('Angular Momentum (kg-m^2/sec)')
 
 
 
-%% Body rel to ECI Plots
+%% Body Relativeto ECI Plots
 figure
-subplot(2,1,1)
+subplot(2,1,1) 
 plot(tnew,rad2deg(statenew(:,1:3)),'LineWidth',2)
 title('Euler Angles from F_b to F_{ECI}')
 xlabel('Time (s)')
@@ -136,7 +135,7 @@ xlabel('Time (s)')
 ylabel('Angular Velocity (rads/s)')
 legend('\omega_x','\omega_y','\omega_z')
 
-%% Body rel to LVLH Plots
+%% Body Relative to LVLH Plots
 figure
 subplot(2,1,1)
 plot(tnew,rad2deg(statenew(:,17:19)),'LineWidth',2)
@@ -159,9 +158,7 @@ xlabel('Time (s)')
 ylabel('Angular Velocity (rads/s)')
 legend('\omega_x','\omega_y','\omega_z')
 
-%% -- Extra Plots --
-
-%% Orbit plot
+% orbit plot
 % figure
 % hold on
 % plot3(statenew(:,11),statenew(:,12),statenew(:,13))
