@@ -2,61 +2,32 @@
 % Henry Macanas
 % Eric Ekstrom
 % Michael Johnston
-% 421 Assignment 6
 clc, close all, clear all
 
 addpath('overhead_functions/')
 
-%% orbital parameters
-h = 53335.2;
-ecc = 0;
-RAAN = 0;
-inc = deg2rad(98.43);
-W = 0;
-nu = 0;
+%% Body parameters
+% -- Initial COM & I calcs
+[COM0,I0] = getCOM(100,zeros(3,1),[2;2;2],['s']); % COM & I for initial configuration
 
-% initial r and v vectors
-[r0,v0 ] = coes2rv(ecc,inc,RAAN,W,h,nu );
+dimRxn = [0.21,0.9,0]; % Reaction wheel dimensions (r,h,~) [m]
+mRxn = 0.01; % Mass of reaction wheels [% of total mass]
+[~,Iw] = getCOM(mRxn*100, zeros(3,1), dimRxn', 'disk');
+Iw = Iw(1,1)*eye(3); % Inertia matrix of all three wheels
 
-% retrieves period
-[ ~,~,~,~,~,~,P,~ ] = coes( r0,v0 );
-
-% angular velcoity of lvlh frame
-w_lvlh_eci_eci = cross(r0,v0)/norm(r0)^2; % this is wrong, should be a 3x1 not 1x1
-
-%% rigid body prop
-
-% lvlh to eci tranformation 
-C_lvlh_eci= eci2lvlh(r0,v0);
-C_eci_lvlh = C_lvlh_eci';
-C_body_lvlh = eye(3);
-C_body_eci = C_body_lvlh*C_lvlh_eci;
-
-% initial states inn reference to eci        
-w0_body_eci = [0;-2*pi/P;0];
-r0_eci_eci = r0;
-v0_eci_eci = v0;
-euler_angles0_eci = euler_angs(C_body_eci);
-q0_eci_eci = quaternion(C_body_eci);
-
-% states relative to lvlh
-euler_angs0_lvlh = [0;0;0];
-w_body_eci = w0_body_eci;
-w_body_lvlh0 = w_body_eci - C_body_eci*w_lvlh_eci_eci;
-q0_body_lvlh = [0;0;0;1];
-
-state = [euler_angles0_eci;w0_body_eci;q0_eci_eci;r0_eci_eci;v0_eci_eci;...
-    euler_angs0_lvlh;w_body_lvlh0;q0_body_lvlh];
-
-% Distances to individual centers of mass
+% -- Deployed COM & I calcs
 Rbb = zeros(3,1); % Distance from bus COM to bus COM
 Rbsp = [0; 2.5; 0]; % Distance from bus COM to solar panel COM
 Rbsens = [0; 0; 1.5]; % Distance from bus COM to sensor COM
-masses = [500,20,20,100]; % Component masses
-dims = [2 2 2 0.25; 2 3 3 0.25; 2 0.05 0.05 1]; % Component dimensions
-[consts.COM, consts.I] = getCOM(masses,...
+masses = [.5-3*mRxn,.20,.20,.10,mRxn*ones(1,3)]*100; % Component masses [kg]
+dims = [2,2,2; 2,3,0.05; 2,3,0.05; 0.25,0.25,1; dimRxn;dimRxn;dimRxn]'; % Component dimensions
+shapes = ['';'';'';'disk';'disk';'disk']; % Shapes of components
+[COM, I] = getCOM(masses,...
 	[Rbb Rbsp -Rbsp Rbsens],...
-	dims); % Spacecraft center of mass
+	dims,shapes); % Spacecraft center of mass
+
+consts.I = I;
+consts.COM = COM;
 
 % inertial parameters
 consts.n   = [1 0 -1  0 0  0    1 1 -1 -1 0 0  0  0    1 -1 0  0;
@@ -66,6 +37,45 @@ consts.rho = [1 0 -1  0 0  0      1    1   -1   -1    0    0     0     0    .125
               0 1  0 -1 0  0    2.5 -2.5  2.5 -2.5  2.5 -2.5   2.5  -2.5       0     0 .125 -.125;
               0 0  0  0 1 -1      0    0    0    0 .025 .025 -.025 -.025     1.5   1.5  1.5   1.5] - consts.COM; % Bus    Solar Panels    Sensor
 consts.A   = [4 4 4 4 4 4    .15 .15 .15 .15 6 6 6 6    .25 .25 .25 .25]; % Bus    Solar Panels    Sensor
+
+%% Orbital parameters
+COEs.a = 6370 + 600; % 600km altitude
+COEs.ecc = 0;
+COEs.inc = deg2rad(40); % 40deg inc
+COEs.RAAN = 0;
+COEs.arg = 0;
+COEs.TA = 0;
+
+% Initial R and V vectors
+[R,V] = COE2RV(COEs,398600);
+% retrieves period
+[ ~,~,~,~,~,~,P,~ ] = coes(R,V);
+
+% angular velcoity of lvlh frame
+w_lvlh_eci_eci = cross(R,V)/norm(R)^2; % this is wrong, should be a 3x1 not 1x1
+
+%% rigid body prop
+% lvlh to eci tranformation 
+C_lvlh_eci= eci2lvlh(R,V);
+C_body_lvlh = eye(3);
+C_body_eci = C_body_lvlh*C_lvlh_eci;
+
+% initial states inn reference to eci        
+w0_body_eci = [0;-2*pi/P;0];
+r0_eci_eci = R;
+v0_eci_eci = V;
+euler_angles0_eci = euler_angs(C_body_eci);
+q0_eci_eci = quaternion(C_body_eci);
+
+% states relative to lvlh
+euler_angs0_lvlh = [0;0;0];
+w_body_eci = w0_body_eci;
+w_body_lvlh0 = w_body_eci - C_body_eci*w_lvlh_eci_eci;
+q0_body_lvlh = [0;0;0;1];
+
+% State vector
+state = [euler_angles0_eci;w0_body_eci;q0_eci_eci;r0_eci_eci;v0_eci_eci;...
+    euler_angs0_lvlh;w_body_lvlh0;q0_body_lvlh];
 
 % Activity 1 & 2 outputs
  fprintf('The inertial tensor is:  \n')
