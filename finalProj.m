@@ -74,6 +74,13 @@ consts.A   = [4 4 4 4 4 4    .15 .15 .15 .15 6 6 6 6    .25 .25 .25 .25]; % Bus 
  fprintf('kg-m2 \n\n')
  fprintf('The mass of the spacecraft is %d kg.\n\n',640)
  
+% gains
+Ts = 3*P; % [s]
+zeta = 0.7292;
+wn = 4.4/(Ts*zeta);
+kd = 2*consts.I*zeta*wn;
+kp = 2*consts.I*wn^2;
+ 
 %--ode call 
 
 Torque = 'yes';
