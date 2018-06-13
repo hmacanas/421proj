@@ -33,7 +33,7 @@ C_body_lvlh = eye(3);
 C_body_eci = C_body_lvlh*C_lvlh_eci;
 
 % initial states inn reference to eci        
-w0_body_eci = [0;-2*pi/P;0];
+w0_body_eci = [0.5;-2.0;3.0]*10^(-3);
 r0_eci_eci = r0;
 v0_eci_eci = v0;
 euler_angles0_eci = euler_angs(C_body_eci);
@@ -44,9 +44,10 @@ euler_angs0_lvlh = [0;0;0];
 w_body_eci = w0_body_eci;
 w_body_lvlh0 = w_body_eci - C_body_eci*w_lvlh_eci_eci;
 q0_body_lvlh = [0;0;0;1];
+w0_wheel = [0;0;0];
 
 state = [euler_angles0_eci;w0_body_eci;q0_eci_eci;r0_eci_eci;v0_eci_eci;...
-    euler_angs0_lvlh;w_body_lvlh0;q0_body_lvlh];
+    euler_angs0_lvlh;w_body_lvlh0;q0_body_lvlh;w0_wheel];
 
 % Distances to individual centers of mass
 Rbb = zeros(3,1); % Distance from bus COM to bus COM
@@ -81,15 +82,29 @@ wn = 4.4/(Ts*zeta);
 kd = 2*consts.I*zeta*wn;
 kp = 2*consts.I*wn^2;
  
+Iwheels = eye(3);
 %--ode call 
 
-Torque = 'yes';
+mission = 'detumble';
 tspan = [0 5*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
-[tnew, statenew] = ode45(@day_func,tspan,state,options,Torque,consts);
+[tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iwheels);
 % Save and load solutions for speed
 % save('soln','tnew','statenew', 'Torques')
 % load('soln')
+
+
+%--ode call 
+
+mission = 'normops';
+tspan = [0 5*P];
+options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
+[tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iwheels);
+% Save and load solutions for speed
+% save('soln','tnew','statenew', 'Torques')
+% load('soln')
+
+
 
 h = zeros(length(statenew),3);
 mag_h = zeros(length(statenew),1);
