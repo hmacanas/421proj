@@ -1,4 +1,4 @@
-function [y, Torques] = normOpsOde(t,state,Torque,consts)
+function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,Iwheels)
 
 % Lets us get torques out with trickery>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     persistent T T_g T_srp T_drag T_mag
@@ -49,10 +49,10 @@ function [y, Torques] = normOpsOde(t,state,Torque,consts)
 % Torques>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     % if no torque set torques to zero
-    if strcmp(Torque,'no')
-        T = [0;0;0];
+    if strcmp(mission,'detumble')
+        T = -kp*q_eci_b(1:3)-kd*w_b_eci;
         F = [0;0;0];
-    else
+    elseif strcmp(mission,'normops')
         % gravity torque
         rb = C_b_ECI*R;
         T_g = 3*muearth/r_mag^5*cross_matrix(rb)*I*rb;
@@ -75,16 +75,18 @@ function [y, Torques] = normOpsOde(t,state,Torque,consts)
         % total torque and force
         T = T_g + T_srp + T_drag + T_mag;
         F = C_b_ECI'*(((F_srp + F_drag)/1000)/640);
+    else
+        error('wrong mission input')
     end
     
 % EOMS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     %error = quaterror(current,desired);
-    error = q_b_lvlh(1:3);
+    Error = q_b_lvlh(1:3);
     
     % control torque
     %mw = kp*error+kd*w_b_eci;
-    mw = kp*error+kd*w_b_lvlh;
+    mw = kp*Error+kd*w_b_lvlh;
     % wheel ang accel
     wdot_wheel = I_wheels\(mw - cross(w_b_eci,I_wheels*w_wheel));
     
