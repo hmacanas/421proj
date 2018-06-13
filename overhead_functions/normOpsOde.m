@@ -52,10 +52,23 @@ function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,Iwheels)
     if strcmp(mission,'detumble')
         T = -kp*q_eci_b(1:3)-kd*w_b_eci;
         F = [0;0;0];
+        mw = [0;0;0];
+        wdot_wheel = [0;0;0];
     elseif strcmp(mission,'normops')
+        % error>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        
+        %error = quaterror(current,desired);
+        Error = q_b_lvlh(1:3);
+
+        % control torque
+        mw = kp*Error+kd*w_b_lvlh;
+        
         % gravity torque
         rb = C_b_ECI*R;
         T_g = 3*muearth/r_mag^5*cross_matrix(rb)*I*rb;
+        
+        % wheel ang accel
+        wdot_wheel = I_wheels\(mw - cross(w_b_eci,I_wheels*w_wheel));
 
         % srp torque and force
         [F_srp,T_srp] = srp(consts.n,consts.rho,ns_b,consts.A);
@@ -75,20 +88,15 @@ function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,Iwheels)
         % total torque and force
         T = T_g + T_srp + T_drag + T_mag;
         F = C_b_ECI'*(((F_srp + F_drag)/1000)/640);
+        
     else
+        
         error('wrong mission input')
+        
     end
     
 % EOMS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    %error = quaterror(current,desired);
-    Error = q_b_lvlh(1:3);
-    
-    % control torque
-    %mw = kp*error+kd*w_b_eci;
-    mw = kp*Error+kd*w_b_lvlh;
-    % wheel ang accel
-    wdot_wheel = I_wheels\(mw - cross(w_b_eci,I_wheels*w_wheel));
     
 	% attitude motion equatiuons eci
 	wdot_eci = I\(T - cross(w_b_eci,I*w_b_eci)-mw);
