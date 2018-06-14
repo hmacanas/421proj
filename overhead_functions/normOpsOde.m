@@ -1,6 +1,6 @@
 function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,I_wheels)
 
-% Lets us get torques out with trickery>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+% Lets us get torques out with trickery >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     persistent T T_g T_srp T_drag T_mag
 
     if nargin < 1
@@ -13,40 +13,38 @@ function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,I_wheels)
         return
     end
     
-% state spaces variables>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+% state spaces variables >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     euler_b_eci = state(1:3);
     w_b_eci = state(4:6);
     q_b_eci = state(7:10);
-    r = state(11:13);
-    v = state(14:16);
+    R = state(11:13);
+    V = state(14:16);
     euler_b_lvlh = state(17:19);
     w_b_lvlh = state(20:22);
     q_b_lvlh = state(23:26);
     w_wheel = state(27:29);
     
-% Constants>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+% Constants >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     m_sc = 100; %kg
-	ns = [1;0;0]; % Constant in ECI
+	ns = [1;0;0]; % Sun vector in ECI
 	I = consts.I; % Spacecraft inertia matrix
-	muearth = 398600;
+	muearth = 398600; % Earth gravtitational constant
 
-	R = state(11:13);
-
-	% nagnitude of r vector
+	% Magnitude of R vector
 	r_mag = norm(R);
 
 	% Transformation matrix from ECI to body
-	C_b_ECI = cx(state(1))*cy(state(2))*cz(state(3));
+	C_b_ECI = cx(euler_b_eci(1))*cy(euler_b_eci(2))*cz(euler_b_eci(3));
 
 	% sun vector in body
 	ns_b = C_b_ECI*ns;
 	COM = consts.COM; % SC center of mass
 
 	% Velocity vector in body
-	v_b =  C_b_ECI*state(14:16)*1000;
+	v_b =  C_b_ECI*V*1000;
 
-% Torques>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+% Torques >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     % if no torque set torques to zero
     if strcmp(mission,'detumble')
@@ -61,13 +59,13 @@ function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,I_wheels)
         wdot_wheel = [0;0;0];
         
     elseif strcmp(mission,'normops')
-        % error>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        % quat error >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         
         %error = quaterror(current,desired);
         Error = q_b_lvlh(1:3);
 
         % control torque
-        mw = kp*Error+kd*w_b_lvlh;
+        mw = kp*Error + kd*w_b_lvlh;
         
         % gravity torque
         rb = C_b_ECI*R;
@@ -94,14 +92,11 @@ function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,I_wheels)
         % total torque and force
         T = T_g + T_srp + T_drag + T_mag;
         F = C_b_ECI'*(((F_srp + F_drag)/1000)/m_sc);
-        
-    else
-        
+	else
         error('wrong mission input')
-        
     end
     
-% EOMS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+% EOMS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     
 	% attitude motion equatiuons eci
@@ -119,5 +114,5 @@ function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,I_wheels)
     
 % ODE Output>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	% outputs that will be intergrated 
-	y = [eulrates_eci;wdot_eci;quaternion_rates_eci;v;acc;eulrates_lvlh;wdot_b_lvlh;quaternion_rates_lvlh;wdot_wheel];
+	y = [eulrates_eci;wdot_eci;quaternion_rates_eci;V;acc;eulrates_lvlh;wdot_b_lvlh;quaternion_rates_lvlh;wdot_wheel];
 end
