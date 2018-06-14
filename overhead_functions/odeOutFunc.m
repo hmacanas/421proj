@@ -9,7 +9,7 @@ function status = odeOutFunc(t,y,flag)
 			Torques.drag = zeros(1,4);
 			Torques.mag = zeros(1,4);
 		case ''
-			[~,T] = day_func();
+			[~,T] = normOpsOde();
 			Torques.tot = [Torques.tot; t(end) T.tot];
 			Torques.grav = [Torques.grav; t(end) T.grav];
 			Torques.srp = [Torques.srp; t(end) T.srp];
