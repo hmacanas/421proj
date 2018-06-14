@@ -104,10 +104,10 @@ options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) o
 
 %--ode call 
 
-mission = 'normops';
-tspan = [0 5*P];
-options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
-[tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
+% mission = 'normops';
+% tspan = [0 5*P];
+% options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
+% [tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
 % Save and load solutions for speed
 % save('soln','tnew','statenew', 'Torques')
 % load('soln')
