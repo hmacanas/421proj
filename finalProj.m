@@ -102,6 +102,8 @@ options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) o
 % save('soln','tnew','statenew', 'Torques')
 % load('soln')
 
+m = propMass(tnew,Torques.tot); % [kg] for each thruster
+massTotal = sum(m); % [kg] total
 
 %--ode call
  
