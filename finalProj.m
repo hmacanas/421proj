@@ -78,13 +78,6 @@ w0_wheel_lvlh = w_body_lvlh0 + C_body_lvlh'*w0_wheel;
 % State vector
 state = [euler_angles0_eci;w0_body_eci;q0_eci_eci;r0_eci_eci;v0_eci_eci;...
     euler_angs0_lvlh;w_body_lvlh0;q0_body_lvlh;w0_wheel;w0_wheel_lvlh];
-
-% Activity 1 & 2 outputs
- fprintf('The inertial tensor is:  \n')
- fprintf('\n')
- disp(consts.I)
- fprintf('kg-m2 \n\n')
- fprintf('The mass of the spacecraft is %d kg.\n\n',640)
  
 % gains
 Ts = 3*P; % [s]
@@ -97,14 +90,71 @@ kp = 2*consts.I*wn^2;
 mission = 'detumble';
 tspan = [0 5*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
-% [tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
+[tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
 % Save and load solutions for speed
 % save('soln','tnew','statenew', 'Torques')
-load('soln')
+%load('soln')
+
+%% Body Relativeto ECI Plots
+figure
+subplot(2,1,1) 
+plot(tnew,rad2deg(statenew(:,1:3)),'LineWidth',2)
+title('Detumble Euler Angles from F_b to F_{ECI}')
+xlabel('Time (s)')
+ylabel('Angle (degrees)')
+legend('\phi','\theta','\psi')
+
+subplot(2,1,2)
+plot(tnew,statenew(:,7:10),'LineWidth',2)
+title('Detumble Quaternion Components from F_b to F_{ECI}')
+xlabel('Time (s)')
+ylabel('Magnitude (None)')
+legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
+
+figure
+set(groot,'DefaultAxesXGrid','on', 'DefaultAxesYGrid','on')
+plot(tnew,statenew(:,4:6),'LineWidth',2)
+title('Detumble Absolute Angular Velocity of Spacecraft: F_b relative to F_{ECI}')
+xlabel('Time (s)')
+ylabel('Angular Velocity (rads/s)')
+legend('\omega_x','\omega_y','\omega_z')
+
+%% Body Relative to LVLH Plots
+figure
+subplot(2,1,1)
+plot(tnew,rad2deg(statenew(:,17:19)),'LineWidth',2)
+title('Detumble Euler Angles from F_b to F_{LVLH}')
+xlabel('Time (s)')
+ylabel('Angle (degrees)')
+legend('\phi','\theta','\psi')
+
+subplot(2,1,2)
+plot(tnew,statenew(:,23:26),'LineWidth',2)
+title('Detumble Quaternion Components from F_b to F_{LVLH}')
+xlabel('Time (s)')
+ylabel('Magnitude (None)')
+legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
+
+figure
+plot(tnew,statenew(:,20:22),'LineWidth',2)
+title('Detumble Absolute Angular Velocity of Spacecraft: F_b relative to F_{LVLH}')
+xlabel('Time (s)')
+ylabel('Angular Velocity (rads/s)')
+legend('\omega_x','\omega_y','\omega_z')
+
+%% Total Torque
+figure
+plot(Torques.tot(:,1),Torques.tot(:,2:4), 'lineWidth', 2)
+grid on
+title('Detumble Thruster Torques')
+xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
+legend('Tx', 'Ty', 'Tz')
 
 m = propMass(tnew,Torques.tot); % [kg] for each thruster
 massTotal = sum(m); % [kg] total
 
+fprintf('The amount of mass each thruster uses is %f, %f, and %f kg. The total amount of mass used by the thrusters is %f kg. \n',[m(1),m(2),m(3),massTotal])
+fprintf('\n')
 %--ode call
  
 % gains
@@ -120,7 +170,7 @@ state(4:6) = [0.001; -0.001; 0.002]; % Update omega
 mission = 'normops';
 tspan = [0 5*P];
 options = odeset('RelTol',1e-6,'AbsTol',1e-6, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
-% [tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
+[tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
 % Save and load solutions for speed
 % save('soln','tnew','statenew', 'Torques')
 % load('soln')
@@ -135,28 +185,21 @@ end
 hW = zeros(length(statenew),3);
 for i = 1:length(statenew)
 	hW(i,:) = cross(diag(Iw), statenew(i,30:32));
+    mag_hW(i,:) = norm(hW(i,:));
 end
-
-%% Angular Momentum Accumulated
-figure
-plot(tnew, hW, 'lineWidth', 2)
-grid on
-title('Angular Momentum of Reaction Wheels')
-xlabel('Time (s)'), ylabel('Angular Momentum (kg-m2/sec)')
-legend('h_x','h_y','h_z')
 
 %% Body Relativeto ECI Plots
 figure
 subplot(2,1,1) 
 plot(tnew,rad2deg(statenew(:,1:3)),'LineWidth',2)
-title('Euler Angles from F_b to F_{ECI}')
+title('Normal Ops Euler Angles from F_b to F_{ECI}')
 xlabel('Time (s)')
 ylabel('Angle (degrees)')
 legend('\phi','\theta','\psi')
 
 subplot(2,1,2)
 plot(tnew,statenew(:,7:10),'LineWidth',2)
-title('Quaternion Components from F_b to F_{ECI}')
+title('Normal Ops Quaternion Components from F_b to F_{ECI}')
 xlabel('Time (s)')
 ylabel('Magnitude (None)')
 legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
@@ -173,30 +216,60 @@ legend('\omega_x','\omega_y','\omega_z')
 figure
 subplot(2,1,1)
 plot(tnew,rad2deg(statenew(:,17:19)),'LineWidth',2)
-title('Euler Angles from F_b to F_{LVLH}')
+title('Normal Ops Euler Angles from F_b to F_{LVLH}')
 xlabel('Time (s)')
 ylabel('Angle (degrees)')
 legend('\phi','\theta','\psi')
 
 subplot(2,1,2)
 plot(tnew,statenew(:,23:26),'LineWidth',2)
-title('Quaternion Components from F_b to F_{LVLH}')
+title('Normal Ops Quaternion Components from F_b to F_{LVLH}')
 xlabel('Time (s)')
 ylabel('Magnitude (None)')
 legend('\epsilon_x','\epsilon_y','\epsilon_z','\eta')
 
 figure
 plot(tnew,statenew(:,20:22),'LineWidth',2)
-title('Absolute Angular Velocity of Spacecraft: F_b relative to F_{LVLH}')
+title('Normal Ops Absolute Angular Velocity of Spacecraft: F_b relative to F_{LVLH}')
 xlabel('Time (s)')
 ylabel('Angular Velocity (rads/s)')
 legend('\omega_x','\omega_y','\omega_z')
+
+% Wheel speeds
+figure
+plot(tnew, statenew(:,27:29), 'lineWidth', 2)
+grid on
+title('Wheel Speeds')
+xlabel('Time (s)'), ylabel('Angular Velocity (rad/s)')
+legend('\omega_x','\omega_y','\omega_z')
+
+%% Angular Momentum Accumulated
+figure
+plot(tnew, hW, 'lineWidth', 2)
+grid on
+title('Normal Ops Angular Momentum of Reaction Wheels')
+xlabel('Time (s)'), ylabel('Angular Momentum (kg-m2/sec)')
+legend('h_x','h_y','h_z')
+
+figure
+plot(tnew, mag_hW, 'lineWidth', 2)
+grid on
+title('Normal Ops Total Angular Momentum Accumulated by all Reaction Wheels')
+xlabel('Time (s)'), ylabel('Angular Momentum (kg-m2/sec)')
+
+% % Wheel speeds
+% figure
+% plot(tnew, statenew(:,30:32), 'lineWidth', 2)
+% grid on
+% title('Normal Ops Wheel Speeds (rel to LVLH)')
+% xlabel('Time (s)'), ylabel('Angular Velocity (rad/s)')
+% legend('\omega_x','\omega_y','\omega_z')
 
 %% Total Torque
 figure
 plot(Torques.tot(:,1),Torques.tot(:,2:4), 'lineWidth', 2)
 grid on
-title('Disturbance Torques')
+title('Normal Ops Disturbance Torques')
 xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
 legend('Tx', 'Ty', 'Tz')
 
@@ -229,19 +302,3 @@ grid on
 title('Magnetic Field Torques')
 xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
 legend('Tx', 'Ty', 'Tz')
-
-% Wheel speeds
-figure
-plot(tnew, statenew(:,27:29), 'lineWidth', 2)
-grid on
-title('Wheel Speeds (rel to ECI)')
-xlabel('Time (s)'), ylabel('Angular Velocity (rad/s)')
-legend('\omega_x','\omega_y','\omega_z')
-
-% Wheel speeds
-figure
-plot(tnew, statenew(:,30:32), 'lineWidth', 2)
-grid on
-title('Wheel Speeds (rel to LVLH)')
-xlabel('Time (s)'), ylabel('Angular Velocity (rad/s)')
-legend('\omega_x','\omega_y','\omega_z')
