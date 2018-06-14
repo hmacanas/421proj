@@ -26,8 +26,8 @@ shapes = ['';'';'';'disk';'disk';'disk']; % Shapes of components
 	[Rbb Rbsp -Rbsp Rbsens],...
 	dims,shapes); % Spacecraft center of mass
 
-consts.I = I;
-consts.COM = COM;
+consts.I = I0;
+consts.COM = COM0;
 
 % inertial parameters
 consts.n   = [1 0 -1  0 0  0    1 1 -1 -1 0 0  0  0    1 -1 0  0;
@@ -96,23 +96,32 @@ kp = 2*consts.I*wn^2;
 mission = 'detumble';
 tspan = [0 5*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
-[tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
-% Save and load solutions for speed
-% save('soln','tnew','statenew', 'Torques')
-% load('soln')
-
-
-%--ode call 
-
-% mission = 'normops';
-% tspan = [0 5*P];
-% options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
 % [tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
 % Save and load solutions for speed
 % save('soln','tnew','statenew', 'Torques')
-% load('soln')
+load('soln')
 
 
+%--ode call
+ 
+% gains
+Ts = 30; % [s]
+consts.I = I; % Update inertia matrix
+consts.COM = COM; % Update center of mass
+zeta = 0.7292;
+wn = 4.4/(Ts*zeta);
+kd = 2*consts.I*zeta*wn;
+kp = 2*consts.I*wn^2;
+state = statenew(end,:); % Update state to last state of detumble
+state(4:6) = [0.001; -0.001; 0.002]; % Update omega
+
+mission = 'normops';
+tspan = [0 5*P];
+options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
+% [tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
+% Save and load solutions for speed
+% save('soln','tnew','statenew', 'Torques')
+% load('soln')f
 
 h = zeros(length(statenew),3);
 mag_h = zeros(length(statenew),1);
@@ -232,3 +241,11 @@ grid on
 title('Magnetic Field Torques')
 xlabel('Time (seconds)'), ylabel('Disturbance Torque [Nm]')
 legend('Tx', 'Ty', 'Tz')
+
+% Wheel speeds
+figure
+plot(tnew, statenew(14:16), 'lineWidth', 2)
+grid on
+title('Wheel Speeds')
+xlabel('Time (s)'), ylabel('Angular Velocity (rad/s)')
+legend('\omega_x','\omega_y','\omega_z')
