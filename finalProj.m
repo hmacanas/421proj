@@ -8,18 +8,18 @@ addpath('overhead_functions/')
 
 %% Body parameters
 % -- Initial COM & I calcs
-[COM0,I0] = getCOM(100,zeros(3,1),[2;2;2],['s']); % COM & I for initial configuration
+[COM0,I0] = getCOM(100.75,zeros(3,1),[2;2;2],['s']); % COM & I for initial configuration
 
-dimRxn = [0.21,0.9,0]; % Reaction wheel dimensions (r,h,~) [m]
-mRxn = 0.01; % Mass of reaction wheels [% of total mass]
-[~,Iw] = getCOM(mRxn*100, zeros(3,1), dimRxn', 'disk');
+dimRxn = [0.075,0.065,0]; % Reaction wheel dimensions (r,h,~) [m]
+mRxn = 1.6; % Mass of reaction wheels [kg]
+[~,Iw] = getCOM(mRxn, zeros(3,1), dimRxn', 'disk');
 Iw = Iw(1,1)*eye(3); % Inertia matrix of all three wheels
 
 % -- Deployed COM & I calcs
 Rbb = zeros(3,1); % Distance from bus COM to bus COM
 Rbsp = [0; 2.5; 0]; % Distance from bus COM to solar panel COM
 Rbsens = [0; 0; 1.5]; % Distance from bus COM to sensor COM
-masses = [.5-3*mRxn,.20,.20,.10,mRxn*ones(1,3)]*100; % Component masses [kg]
+masses = [50,20,20,10,mRxn*ones(1,3)]; % Component masses [kg]
 dims = [2,2,2; 2,3,0.05; 2,3,0.05; 0.25,0.25,1; dimRxn;dimRxn;dimRxn]'; % Component dimensions
 shapes = ['';'';'';'disk';'disk';'disk']; % Shapes of components
 [COM, I] = getCOM(masses,...
@@ -119,10 +119,10 @@ state(4:6) = [0.001; -0.001; 0.002]; % Update omega
 
 mission = 'normops';
 tspan = [0 5*P];
-options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
+options = odeset('RelTol',1e-6,'AbsTol',1e-6, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
 [tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
 % Save and load solutions for speed
-% save('soln','tnew','statenew', 'Torques')
+save('soln','tnew','statenew', 'Torques')
 % load('soln')
 
 h = zeros(length(statenew),3);
@@ -130,6 +130,11 @@ mag_h = zeros(length(statenew),1);
 for i = 1:length(statenew)
 	h(i,:) = cross(diag(consts.I,0), statenew(i,4:6));
     mag_h(i,:) = norm(h(i,:));
+end
+
+hW = zeros(length(statenew),3);
+for i = 1:length(statenew)
+	hW(i,:) = cross(diag(Iw), statenew(i,30:32));
 end
 
 %% Angular Momentum Accumulated
@@ -150,6 +155,12 @@ xlabel('Time (seconds)'), ylabel('Angular Momentum (kg-m2/sec)')
 
 title('Total Angular Momentum Accumulated')
 xlabel('Time (seconds)'), ylabel('Angular Momentum (kg-m^2/sec)')
+
+figure
+plot(tnew, hW, 'lineWidth', 2)
+grid on
+title('Angular Momentum of Wheel')
+xlabel('Time (s)'), ylabel('Angular Momentum (kg-m^2/sec)')
 
 %% Body Relativeto ECI Plots
 figure
@@ -197,12 +208,6 @@ title('Absolute Angular Velocity of Spacecraft: F_b relative to F_{LVLH}')
 xlabel('Time (s)')
 ylabel('Angular Velocity (rads/s)')
 legend('\omega_x','\omega_y','\omega_z')
-
-% orbit plot
-% figure
-% hold on
-% plot3(statenew(:,11),statenew(:,12),statenew(:,13))
-% plot3(statenew(1,11),statenew(1,12),statenew(1,13),'*')
 
 %% Total Torque
 figure
