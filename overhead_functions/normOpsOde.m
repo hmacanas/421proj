@@ -58,7 +58,7 @@ function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,I_wheels)
         F = [0;0;0];
         mw = [0;0;0];
         wdot_wheel = [0;0;0];
-        wdot_wheel_lvlh = w_wheel_lvlh;
+        wdot_wheel_lvlh = [0;0;0];
         
     elseif strcmp(mission,'normops')
         % quat error >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

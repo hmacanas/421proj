@@ -120,7 +120,7 @@ tspan = [0 5*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
 [tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
 % Save and load solutions for speed
-save('soln','tnew','statenew', 'Torques')
+% save('soln','tnew','statenew', 'Torques')
 % load('soln')
 
 h = zeros(length(statenew),3);
@@ -242,8 +242,16 @@ legend('Tx', 'Ty', 'Tz')
 
 % Wheel speeds
 figure
-plot(tnew, statenew(:,14:16), 'lineWidth', 2)
+plot(tnew, statenew(:,27:29), 'lineWidth', 2)
 grid on
-title('Wheel Speeds')
+title('Wheel Speeds (rel to ECI)')
+xlabel('Time (s)'), ylabel('Angular Velocity (rad/s)')
+legend('\omega_x','\omega_y','\omega_z')
+
+% Wheel speeds
+figure
+plot(tnew, statenew(:,30:32), 'lineWidth', 2)
+grid on
+title('Wheel Speeds (rel to LVLH)')
 xlabel('Time (s)'), ylabel('Angular Velocity (rad/s)')
 legend('\omega_x','\omega_y','\omega_z')
