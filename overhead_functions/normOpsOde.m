@@ -50,7 +50,7 @@ function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,I_wheels)
 
     % if no torque set torques to zero
     if strcmp(mission,'detumble')
-        T = -kp*q_b_eci(1:3)-kd*w_b_eci;
+        T = -kp*q_b_lvlh(1:3)-kd*w_b_lvlh;
         T_g = zeros(3,1);
         T_srp = zeros(3,1);
         T_drag = zeros(3,1);
