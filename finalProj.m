@@ -97,10 +97,10 @@ kp = 2*consts.I*wn^2;
 mission = 'detumble';
 tspan = [0 5*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
-[tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
+% [tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
 % Save and load solutions for speed
 % save('soln','tnew','statenew', 'Torques')
-% load('soln')
+load('soln')
 
 m = propMass(tnew,Torques.tot); % [kg] for each thruster
 massTotal = sum(m); % [kg] total
@@ -120,9 +120,9 @@ state(4:6) = [0.001; -0.001; 0.002]; % Update omega
 mission = 'normops';
 tspan = [0 5*P];
 options = odeset('RelTol',1e-6,'AbsTol',1e-6, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
-[tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
+% [tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
 % Save and load solutions for speed
-save('soln','tnew','statenew', 'Torques')
+% save('soln','tnew','statenew', 'Torques')
 % load('soln')
 
 h = zeros(length(statenew),3);
@@ -139,28 +139,11 @@ end
 
 %% Angular Momentum Accumulated
 figure
-subplot(2,1,1)
-plot(tnew,h(:,:), 'lineWidth', 2)
-grid on
-
-title('Angular Momentum')
-xlabel('Time (seconds)'), ylabel('Angular Momentum (kg-m2/sec)')
-legend('h_x','h_y','h_z')
-
-subplot(2,1,2)
-plot(tnew,mag_h(:,:), 'lineWidth', 2)
-grid on
-title('Total Angular Momentum')
-xlabel('Time (seconds)'), ylabel('Angular Momentum (kg-m2/sec)')
-
-title('Total Angular Momentum Accumulated')
-xlabel('Time (seconds)'), ylabel('Angular Momentum (kg-m^2/sec)')
-
-figure
 plot(tnew, hW, 'lineWidth', 2)
 grid on
-title('Angular Momentum of Wheel')
-xlabel('Time (s)'), ylabel('Angular Momentum (kg-m^2/sec)')
+title('Angular Momentum of Reaction Wheels')
+xlabel('Time (s)'), ylabel('Angular Momentum (kg-m2/sec)')
+legend('h_x','h_y','h_z')
 
 %% Body Relativeto ECI Plots
 figure
