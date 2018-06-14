@@ -73,10 +73,11 @@ w_body_eci = w0_body_eci;
 w_body_lvlh0 = w_body_eci - C_body_eci*w_lvlh_eci_eci;
 q0_body_lvlh = [0;0;0;1];
 w0_wheel = [0;0;0];
+w0_wheel_lvlh = w_body_lvlh0 + C_body_lvlh'*w0_wheel;
 
 % State vector
 state = [euler_angles0_eci;w0_body_eci;q0_eci_eci;r0_eci_eci;v0_eci_eci;...
-    euler_angs0_lvlh;w_body_lvlh0;q0_body_lvlh;w0_wheel];
+    euler_angs0_lvlh;w_body_lvlh0;q0_body_lvlh;w0_wheel;w0_wheel_lvlh];
 
 % Activity 1 & 2 outputs
  fprintf('The inertial tensor is:  \n')
@@ -96,10 +97,10 @@ kp = 2*consts.I*wn^2;
 mission = 'detumble';
 tspan = [0 5*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
-% [tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
+[tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
 % Save and load solutions for speed
 % save('soln','tnew','statenew', 'Torques')
-load('soln')
+% load('soln')
 
 
 %--ode call
@@ -108,7 +109,6 @@ load('soln')
 Ts = 30; % [s]
 consts.I = I; % Update inertia matrix
 consts.COM = COM; % Update center of mass
-zeta = 0.7292;
 wn = 4.4/(Ts*zeta);
 kd = 2*consts.I*zeta*wn;
 kp = 2*consts.I*wn^2;
@@ -118,10 +118,10 @@ state(4:6) = [0.001; -0.001; 0.002]; % Update omega
 mission = 'normops';
 tspan = [0 5*P];
 options = odeset('RelTol',1e-8,'AbsTol',1e-8, 'OutputFcn',@(t,y,flag,varargin) odeOutFunc(t,y,flag));
-% [tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
+[tnew, statenew] = ode45(@normOpsOde,tspan,state,options,mission,consts,kd,kp,Iw);
 % Save and load solutions for speed
-% save('soln','tnew','statenew', 'Torques')
-% load('soln')f
+save('soln','tnew','statenew', 'Torques')
+% load('soln')
 
 h = zeros(length(statenew),3);
 mag_h = zeros(length(statenew),1);
@@ -148,8 +148,6 @@ xlabel('Time (seconds)'), ylabel('Angular Momentum (kg-m2/sec)')
 
 title('Total Angular Momentum Accumulated')
 xlabel('Time (seconds)'), ylabel('Angular Momentum (kg-m^2/sec)')
-
-
 
 %% Body Relativeto ECI Plots
 figure
@@ -244,7 +242,7 @@ legend('Tx', 'Ty', 'Tz')
 
 % Wheel speeds
 figure
-plot(tnew, statenew(14:16), 'lineWidth', 2)
+plot(tnew, statenew(:,14:16), 'lineWidth', 2)
 grid on
 title('Wheel Speeds')
 xlabel('Time (s)'), ylabel('Angular Velocity (rad/s)')

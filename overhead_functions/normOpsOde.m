@@ -24,6 +24,7 @@ function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,I_wheels)
     w_b_lvlh = state(20:22);
     q_b_lvlh = state(23:26);
     w_wheel = state(27:29);
+    w_wheel_lvlh = state(30:32);
     
 % Constants >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     m_sc = 100; %kg
@@ -57,6 +58,7 @@ function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,I_wheels)
         F = [0;0;0];
         mw = [0;0;0];
         wdot_wheel = [0;0;0];
+        wdot_wheel_lvlh = w_wheel_lvlh;
         
     elseif strcmp(mission,'normops')
         % quat error >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -73,6 +75,7 @@ function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,I_wheels)
         
         % wheel ang accel
         wdot_wheel = I_wheels\(mw - cross(w_b_eci,I_wheels*w_wheel));
+        wdot_wheel_lvlh = I_wheels\(mw - cross(w_b_lvlh,I_wheels*w_wheel_lvlh));
 
         % srp torque and force
         [F_srp,T_srp] = srp(consts.n,consts.rho,ns_b,consts.A);
@@ -114,5 +117,6 @@ function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,I_wheels)
     
 % ODE Output>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	% outputs that will be intergrated 
-	y = [eulrates_eci;wdot_eci;quaternion_rates_eci;V;acc;eulrates_lvlh;wdot_b_lvlh;quaternion_rates_lvlh;wdot_wheel];
+	y = [eulrates_eci;wdot_eci;quaternion_rates_eci;V;acc;eulrates_lvlh;...
+		wdot_b_lvlh;quaternion_rates_lvlh;wdot_wheel;wdot_wheel_lvlh];
 end
