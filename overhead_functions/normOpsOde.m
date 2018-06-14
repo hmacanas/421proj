@@ -1,4 +1,4 @@
-function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,Iwheels)
+function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,I_wheels)
 
 % Lets us get torques out with trickery>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     persistent T T_g T_srp T_drag T_mag
@@ -59,6 +59,7 @@ function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,Iwheels)
         F = [0;0;0];
         mw = [0;0;0];
         wdot_wheel = [0;0;0];
+        
     elseif strcmp(mission,'normops')
         % error>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         
