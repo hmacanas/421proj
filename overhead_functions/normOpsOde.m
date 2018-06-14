@@ -6,7 +6,7 @@ function [y, Torques] = normOpsOde(t,state,mission,consts,kd,kp,I_wheels)
     if nargin < 1
         Torques.tot = T';
         Torques.grav = T_g';
-        Torques.srp = T_srp';s
+        Torques.srp = T_srp';
         Torques.drag = T_drag';
         Torques.mag = T_mag';
         y=0;
